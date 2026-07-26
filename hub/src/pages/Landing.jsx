@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Bus, ClipboardCheck, UtensilsCrossed, CalendarClock, ArrowRight } from "lucide-react";
+import { Bus, ClipboardCheck, UtensilsCrossed, CalendarClock, CalendarRange, ArrowRight } from "lucide-react";
 import ServiceTile from "../components/ServiceTile";
 import ProfileWidget from "../components/ProfileWidget";
 import { SATELLITES } from "../lib/satellites";
@@ -41,6 +41,13 @@ const NATIVE_FEATURES = [
     title: "Mentor Booking",
     desc: "Book a slot with your mentor",
     accent: "#D97706"
+  },
+  {
+    to: "/events",
+    icon: CalendarRange,
+    title: "Event Catalog",
+    desc: "Upcoming events at SSN and other colleges",
+    accent: "#2563EB"
   }
 ];
 
