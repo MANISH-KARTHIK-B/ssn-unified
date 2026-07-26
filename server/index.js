@@ -248,6 +248,24 @@ app.post("/api/hub/appointments", requireAuth, (req, res) => {
   res.status(201).json(appt);
 });
 
+// ---------- HUB: EVENT CATALOG ----------
+app.get("/api/hub/events", (req, res) => {
+  res.json(db.data.events);
+});
+app.get("/api/hub/events/registrations", requireAuth, (req, res) => {
+  res.json(db.data.eventRegistrations.filter((r) => r.studentId === req.user.id));
+});
+app.post("/api/hub/events/:id/register", requireAuth, (req, res) => {
+  const event = db.data.events.find((e) => e.id === req.params.id);
+  if (!event) return res.status(404).json({ error: "Event not found" });
+  const already = db.data.eventRegistrations.find((r) => r.eventId === event.id && r.studentId === req.user.id);
+  if (already) return res.status(409).json({ error: "Already registered" });
+  const registration = { id: nanoid(8), eventId: event.id, studentId: req.user.id, registeredAt: new Date().toISOString() };
+  db.data.eventRegistrations.push(registration);
+  db.write();
+  res.status(201).json(registration);
+});
+
 // ---------- HUB: BUS ROUTES (static list; live positions over socket) ----------
 app.get("/api/hub/bus-routes", (req, res) => {
   res.json(db.data.busRoutes);
