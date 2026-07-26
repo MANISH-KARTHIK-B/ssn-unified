@@ -1,0 +1,26 @@
+{
+  "name": "ssn-unified",
+  "private": true,
+  "version": "1.0.0",
+  "description": "SSN Unified - modernized front-end monorepo (hub + satellite apps) with a shared mock backend",
+  "workspaces": [
+    "server",
+    "apps/hub",
+    "apps/coe",
+    "apps/lms",
+    "apps/library",
+    "apps/gatepass",
+    "apps/helpdesk",
+    "apps/erp"
+  ],
+  "scripts": {
+    "install:all": "npm install",
+    "dev": "concurrently -k -n SERVER,HUB,COE,LMS,LIB,GATE,HELP,ERP -c blue,green,magenta,yellow,cyan,red,white,gray \"npm run dev -w server\" \"npm run dev -w apps/hub\" \"npm run dev -w apps/coe\" \"npm run dev -w apps/lms\" \"npm run dev -w apps/library\" \"npm run dev -w apps/gatepass\" \"npm run dev -w apps/helpdesk\" \"npm run dev -w apps/erp\"",
+    "dev:server": "npm run dev -w server",
+    "dev:hub": "npm run dev -w apps/hub",
+    "build:all": "npm run build -w apps/hub && npm run build -w apps/coe && npm run build -w apps/lms && npm run build -w apps/library && npm run build -w apps/gatepass && npm run build -w apps/helpdesk && npm run build -w apps/erp"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
