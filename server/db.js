@@ -257,6 +257,21 @@ function buildMessMenu() {
   }));
 }
 
+function buildEvents() {
+  return [
+    { id: "evt1", title: "Shaastra Robotics Challenge", college: "IIT Madras", department: "Mechanical / Robotics", category: "Technical", mode: "Offline", venue: "IIT Madras Campus, Chennai", eventDate: "2026-08-14", registrationDeadline: "2026-08-05", description: "A multi-round autonomous and manual robotics competition open to inter-college teams." },
+    { id: "evt2", title: "SSN Tech Symposium", college: "SSN College of Engineering", department: "Computer Science and Engineering", category: "Technical", mode: "Offline", venue: "SSN Main Auditorium", eventDate: "2026-07-30", registrationDeadline: "2026-07-27", description: "Paper presentations, coding contests and a project expo across CSE and IT streams." },
+    { id: "evt3", title: "Riviera Cultural Fest", college: "VIT Vellore", department: "Cultural Committee", category: "Cultural", mode: "Offline", venue: "VIT Vellore Campus", eventDate: "2026-09-05", registrationDeadline: "2026-08-20", description: "One of the largest student-run cultural festivals with music, dance and design events." },
+    { id: "evt4", title: "Techkriti Innovation Meet", college: "IIT Bombay", department: "Electronics and Communication", category: "Technical", mode: "Hybrid", venue: "IIT Bombay Campus, Mumbai", eventDate: "2026-08-22", registrationDeadline: "2026-08-10", description: "Startup showcases, hardware hackathons and innovation talks." },
+    { id: "evt5", title: "Pragyan National Tech Fest", college: "NIT Tiruchirappalli", department: "Electrical and Electronics", category: "Technical", mode: "Offline", venue: "NIT Trichy Campus", eventDate: "2026-09-12", registrationDeadline: "2026-08-30", description: "National-level technical fest with workshops, competitions and guest lectures." },
+    { id: "evt6", title: "Milan Cultural Carnival", college: "SRM Institute of Science and Technology", department: "Cultural Committee", category: "Cultural", mode: "Offline", venue: "SRM Kattankulathur Campus", eventDate: "2026-08-28", registrationDeadline: "2026-08-15", description: "Inter-college cultural carnival featuring music, dance, fashion and art competitions." },
+    { id: "evt7", title: "SSN Design Thinking Studio Review", college: "SSN College of Engineering", department: "Common First Year", category: "Workshop", mode: "Offline", venue: "SSN Design Studio", eventDate: "2026-08-03", registrationDeadline: "2026-07-29", description: "Open studio review and workshop for the Design Thinking and Innovation course." },
+    { id: "evt8", title: "Sathyabama National Sports Meet", college: "Sathyabama Institute of Science and Technology", department: "Sports Committee", category: "Sports", mode: "Offline", venue: "Sathyabama Sports Complex, Chennai", eventDate: "2026-09-18", registrationDeadline: "2026-09-01", description: "Inter-college athletics, badminton, chess and football tournaments." },
+    { id: "evt9", title: "SSN Inter-Department Coding Sprint", college: "SSN College of Engineering", department: "Information Technology", category: "Technical", mode: "Online", venue: "Online (Codeforces-hosted)", eventDate: "2026-08-09", registrationDeadline: "2026-08-07", description: "A timed competitive programming sprint open to all departments." },
+    { id: "evt10", title: "Kurukshetra Techno-Management Fest", college: "NIT Tiruchirappalli", department: "Management Studies", category: "Technical", mode: "Hybrid", venue: "NIT Trichy Campus", eventDate: "2026-09-25", registrationDeadline: "2026-09-10", description: "Techno-management fest with case study challenges and entrepreneurship talks." }
+  ];
+}
+
 export async function initDb() {
   await db.read();
   if (!db.data || !db.data.users) {
@@ -271,6 +286,8 @@ export async function initDb() {
       mentors: buildMentors(),
       appointments: [],
       mess: { menu: buildMessMenu(), feedback: [] },
+      events: buildEvents(),
+      eventRegistrations: [],
       coe: {
         catMarks: students.map((s) => ({
           studentId: s.id,
