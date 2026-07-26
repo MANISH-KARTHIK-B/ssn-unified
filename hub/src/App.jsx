@@ -8,6 +8,7 @@ import BusTracker from "./pages/BusTracker";
 import Attendance from "./pages/Attendance";
 import Mess from "./pages/Mess";
 import Mentors from "./pages/Mentors";
+import Events from "./pages/Events";
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
@@ -41,6 +42,7 @@ export default function App() {
           <Route path="/attendance" element={<Protected><Attendance /></Protected>} />
           <Route path="/mess" element={<Protected><Mess /></Protected>} />
           <Route path="/mentors" element={<Protected><Mentors /></Protected>} />
+          <Route path="/events" element={<Protected><Events /></Protected>} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
