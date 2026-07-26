@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 
 export default function Login() {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [username, setUsername] = useState("student1");
   const [password, setPassword] = useState("demo1234");
   const [error, setError] = useState("");
@@ -14,6 +16,7 @@ export default function Login() {
     setBusy(true);
     try {
       await login(username, password);
+      navigate("/", { replace: true });
     } catch {
       setError("Invalid username or password.");
     } finally {
