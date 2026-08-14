@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { CalendarRange, MapPin, Building2, Clock, CheckCircle2 } from "lucide-react";
+import { CalendarRange, MapPin, Building2, Clock, CheckCircle2, Search, CalendarPlus } from "lucide-react";
 import { api } from "../lib/api";
 
 const CATEGORY_STYLE = {
@@ -10,8 +10,7 @@ const CATEGORY_STYLE = {
 };
 
 function daysUntil(dateStr) {
-  const diff = Math.ceil((new Date(dateStr) - new Date()) / (1000 * 60 * 60 * 24));
-  return diff;
+  return Math.ceil((new Date(dateStr) - new Date()) / (1000 * 60 * 60 * 24));
 }
 
 function DeadlineBadge({ deadline }) {
@@ -22,11 +21,36 @@ function DeadlineBadge({ deadline }) {
   return <span className="rounded-full bg-green-500/15 px-2.5 py-1 text-xs font-medium text-green-400">Open — closes {deadline}</span>;
 }
 
+function downloadIcs(event) {
+  const dt = event.eventDate.replace(/-/g, "");
+  const ics = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "BEGIN:VEVENT",
+    `SUMMARY:${event.title}`,
+    `DESCRIPTION:${event.description}`,
+    `LOCATION:${event.venue}`,
+    `DTSTART;VALUE=DATE:${dt}`,
+    "END:VEVENT",
+    "END:VCALENDAR"
+  ].join("\r\n");
+  const blob = new Blob([ics], { type: "text/calendar" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${event.title.replace(/\s+/g, "-")}.ics`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function Events() {
   const [events, setEvents] = useState([]);
   const [registrations, setRegistrations] = useState([]);
   const [college, setCollege] = useState("All");
   const [category, setCategory] = useState("All");
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState("eventDate");
+  const [view, setView] = useState("all");
   const [busyId, setBusyId] = useState(null);
 
   useEffect(() => {
@@ -36,14 +60,19 @@ export default function Events() {
 
   const colleges = useMemo(() => ["All", ...new Set(events.map((e) => e.college))], [events]);
   const categories = useMemo(() => ["All", ...new Set(events.map((e) => e.category))], [events]);
+  const isRegistered = (id) => registrations.some((r) => r.eventId === id);
 
   const filtered = useMemo(() => {
-    return events
-      .filter((e) => (college === "All" || e.college === college) && (category === "All" || e.category === category))
-      .sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate));
-  }, [events, college, category]);
-
-  const isRegistered = (id) => registrations.some((r) => r.eventId === id);
+    let list = events.filter(
+      (e) =>
+        (college === "All" || e.college === college) &&
+        (category === "All" || e.category === category) &&
+        (!query || e.title.toLowerCase().includes(query.toLowerCase()) || e.description.toLowerCase().includes(query.toLowerCase()))
+    );
+    if (view === "mine") list = list.filter((e) => isRegistered(e.id));
+    const sortKey = sort === "deadline" ? "registrationDeadline" : "eventDate";
+    return [...list].sort((a, b) => new Date(a[sortKey]) - new Date(b[sortKey]));
+  }, [events, college, category, query, sort, view, registrations]);
 
   async function register(id) {
     setBusyId(id);
@@ -51,7 +80,7 @@ export default function Events() {
       const res = await api.post(`/api/hub/events/${id}/register`);
       setRegistrations((prev) => [...prev, res.data]);
     } catch {
-      // already registered or not logged in — ignore for this demo
+      // already registered or not logged in
     } finally {
       setBusyId(null);
     }
@@ -69,12 +98,34 @@ export default function Events() {
         </div>
       </div>
 
+      <div className="mb-4 flex gap-2">
+        <button onClick={() => setView("all")} className={`rounded-full border px-3 py-1.5 text-xs font-medium ${view === "all" ? "border-amber-500 bg-amber-500/15 text-amber-300" : "border-navy-800 text-navy-300"}`}>
+          All events
+        </button>
+        <button onClick={() => setView("mine")} className={`rounded-full border px-3 py-1.5 text-xs font-medium ${view === "mine" ? "border-amber-500 bg-amber-500/15 text-amber-300" : "border-navy-800 text-navy-300"}`}>
+          My registrations ({registrations.length})
+        </button>
+      </div>
+
       <div className="mb-6 flex flex-wrap gap-3">
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-navy-500" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search events…"
+            className="rounded-lg border border-navy-700 bg-navy-900 py-2 pl-9 pr-3 text-sm text-white outline-none focus:border-amber-500"
+          />
+        </div>
         <select value={college} onChange={(e) => setCollege(e.target.value)} className="rounded-lg border border-navy-700 bg-navy-900 px-3 py-2 text-sm text-white outline-none focus:border-amber-500">
           {colleges.map((c) => <option key={c}>{c}</option>)}
         </select>
         <select value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-lg border border-navy-700 bg-navy-900 px-3 py-2 text-sm text-white outline-none focus:border-amber-500">
           {categories.map((c) => <option key={c}>{c}</option>)}
+        </select>
+        <select value={sort} onChange={(e) => setSort(e.target.value)} className="rounded-lg border border-navy-700 bg-navy-900 px-3 py-2 text-sm text-white outline-none focus:border-amber-500">
+          <option value="eventDate">Sort by event date</option>
+          <option value="deadline">Sort by registration deadline</option>
         </select>
       </div>
 
@@ -104,9 +155,14 @@ export default function Events() {
               <div className="mt-3 flex items-center justify-between">
                 <DeadlineBadge deadline={e.registrationDeadline} />
                 {registered ? (
-                  <span className="flex items-center gap-1.5 text-xs font-medium text-green-400">
-                    <CheckCircle2 className="h-4 w-4" /> Registered
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => downloadIcs(e)} className="flex items-center gap-1 rounded-lg border border-navy-700 px-2 py-1 text-[11px] text-navy-300 hover:border-amber-500">
+                      <CalendarPlus className="h-3 w-3" /> Add to calendar
+                    </button>
+                    <span className="flex items-center gap-1 text-xs font-medium text-green-400">
+                      <CheckCircle2 className="h-4 w-4" /> Registered
+                    </span>
+                  </div>
                 ) : (
                   <button
                     onClick={() => register(e.id)}
