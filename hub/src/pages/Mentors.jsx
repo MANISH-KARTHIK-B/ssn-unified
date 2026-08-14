@@ -1,29 +1,55 @@
-import React, { useEffect, useState } from "react";
-import { CalendarClock } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import { CalendarClock, X } from "lucide-react";
 import { api } from "../lib/api";
 
 const STATUS_STYLE = {
   Pending: "bg-amber-500/15 text-amber-400",
   Confirmed: "bg-blue-500/15 text-blue-400",
-  Completed: "bg-green-500/15 text-green-400"
+  Completed: "bg-green-500/15 text-green-400",
+  Cancelled: "bg-navy-800 text-navy-400"
 };
+
+function parseSlot(slot) {
+  const [day, time] = slot.split(" ");
+  return { day, time };
+}
 
 export default function Mentors() {
   const [mentors, setMentors] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [selectedMentor, setSelectedMentor] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
+  const [deptFilter, setDeptFilter] = useState("All");
 
   useEffect(() => {
     api.get("/api/hub/mentors").then((res) => setMentors(res.data));
     api.get("/api/hub/appointments").then((res) => setAppointments(res.data));
   }, []);
 
+  const departments = useMemo(() => ["All", ...new Set(mentors.map((m) => m.department))], [mentors]);
+  const filteredMentors = useMemo(
+    () => (deptFilter === "All" ? mentors : mentors.filter((m) => m.department === deptFilter)),
+    [mentors, deptFilter]
+  );
+
+  const grid = useMemo(() => {
+    if (!selectedMentor) return { days: [], times: [] };
+    const parsed = selectedMentor.slots.map(parseSlot);
+    const days = [...new Set(parsed.map((p) => p.day))];
+    const times = [...new Set(parsed.map((p) => p.time))].sort();
+    return { days, times };
+  }, [selectedMentor]);
+
   async function book() {
     if (!selectedMentor || !selectedSlot) return;
     const res = await api.post("/api/hub/appointments", { mentorId: selectedMentor.id, slot: selectedSlot });
     setAppointments((prev) => [res.data, ...prev]);
     setSelectedSlot(null);
+  }
+
+  async function cancel(id) {
+    const res = await api.post(`/api/hub/appointments/${id}/cancel`);
+    setAppointments((prev) => prev.map((a) => (a.id === id ? res.data : a)));
   }
 
   return (
@@ -37,8 +63,13 @@ export default function Mentors() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="space-y-4">
-          <p className="text-sm font-medium text-navy-300">Available mentors</p>
-          {mentors.map((m) => (
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-navy-300">Available mentors</p>
+            <select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)} className="rounded-lg border border-navy-700 bg-navy-900 px-3 py-1.5 text-xs text-white">
+              {departments.map((d) => <option key={d}>{d}</option>)}
+            </select>
+          </div>
+          {filteredMentors.map((m) => (
             <div key={m.id} className={`rounded-xl border p-4 ${selectedMentor?.id === m.id ? "border-amber-500" : "border-navy-800"} bg-navy-900`}>
               <div className="flex items-center justify-between">
                 <div>
@@ -53,16 +84,45 @@ export default function Mentors() {
                 </button>
               </div>
               {selectedMentor?.id === m.id && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {m.slots.map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => setSelectedSlot(s)}
-                      className={`rounded-full border px-3 py-1 text-xs ${selectedSlot === s ? "border-amber-500 bg-amber-500/15 text-amber-300" : "border-navy-700 text-navy-300"}`}
-                    >
-                      {s}
-                    </button>
-                  ))}
+                <div className="mt-4 overflow-x-auto">
+                  <table className="w-full border-collapse text-xs">
+                    <thead>
+                      <tr>
+                        <th className="p-1"></th>
+                        {grid.days.map((d) => (
+                          <th key={d} className="p-1 text-navy-400">{d}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {grid.times.map((t) => (
+                        <tr key={t}>
+                          <td className="pr-2 text-navy-500">{t}</td>
+                          {grid.days.map((d) => {
+                            const slot = `${d} ${t}`;
+                            const available = m.slots.includes(slot);
+                            const isSelected = selectedSlot === slot;
+                            return (
+                              <td key={d} className="p-1">
+                                {available ? (
+                                  <button
+                                    onClick={() => setSelectedSlot(slot)}
+                                    className={`h-8 w-16 rounded-md border text-[11px] ${
+                                      isSelected ? "border-amber-500 bg-amber-500/20 text-amber-300" : "border-navy-700 bg-navy-950 text-navy-300 hover:border-navy-500"
+                                    }`}
+                                  >
+                                    {isSelected ? "Selected" : "Open"}
+                                  </button>
+                                ) : (
+                                  <div className="h-8 w-16 rounded-md bg-navy-900/40" />
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
@@ -87,9 +147,16 @@ export default function Mentors() {
                     <p className="text-sm text-navy-100">{mentor?.name || a.mentorId}</p>
                     <p className="text-xs text-navy-500">{a.slot}</p>
                   </div>
-                  <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_STYLE[a.status] || "bg-navy-800 text-navy-300"}`}>
-                    {a.status}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_STYLE[a.status] || "bg-navy-800 text-navy-300"}`}>
+                      {a.status}
+                    </span>
+                    {a.status === "Pending" && (
+                      <button onClick={() => cancel(a.id)} className="rounded-md border border-navy-700 p-1.5 text-navy-400 hover:border-red-500 hover:text-red-400">
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
             })}
