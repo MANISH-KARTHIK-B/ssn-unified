@@ -25,3 +25,31 @@ body {
   background: #cbd3e1;
   border-radius: 999px;
 }
+.bus-marker {
+  animation: busPulse 1.8s ease-out infinite;
+}
+@keyframes busPulse {
+  0% { box-shadow: 0 0 0 0 rgb(var(--pulse-rgb) / 55%); }
+  70% { box-shadow: 0 0 0 14px rgb(var(--pulse-rgb) / 0%); }
+  100% { box-shadow: 0 0 0 0 rgb(var(--pulse-rgb) / 0%); }
+}
+
+.leaflet-control-zoom a {
+  background: #0B1E3F !important;
+  color: #E3E8F6 !important;
+  border-color: #1D3866 !important;
+}
+.leaflet-control-zoom a:hover {
+  background: #142A52 !important;
+}
+.leaflet-popup-content-wrapper {
+  background: #0B1E3F;
+  color: #E3E8F6;
+  border-radius: 12px;
+}
+.leaflet-popup-tip {
+  background: #0B1E3F;
+}
+.leaflet-popup-content b {
+  color: #ffffff;
+}
