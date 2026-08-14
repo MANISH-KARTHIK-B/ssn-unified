@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
-import { ClipboardCheck } from "lucide-react";
+import { ClipboardCheck, Download, AlertTriangle } from "lucide-react";
 import { api, API_URL_BASE } from "../lib/api";
 import { useAuth } from "../lib/auth";
+import DonutChart from "../components/DonutChart";
 
 const THRESHOLD = 75;
 
@@ -10,6 +11,12 @@ function pctColor(pct) {
   if (pct >= 85) return "text-green-400 bg-green-500/10";
   if (pct >= THRESHOLD) return "text-amber-400 bg-amber-500/10";
   return "text-red-400 bg-red-500/10";
+}
+
+function donutColor(pct) {
+  if (pct >= 85) return "#22C55E";
+  if (pct >= THRESHOLD) return "#F5B24D";
+  return "#EF4444";
 }
 
 function WhatIf({ subject }) {
@@ -43,6 +50,18 @@ function WhatIf({ subject }) {
   );
 }
 
+function exportCsv(rows) {
+  const header = "Subject,Held,Attended,Percentage\n";
+  const body = rows.map((r) => `${r.subject},${r.held},${r.attended},${r.percentage}`).join("\n");
+  const blob = new Blob([header + body], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "attendance-report.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function Attendance() {
   const { user } = useAuth();
   const [rows, setRows] = useState([]);
@@ -70,6 +89,8 @@ export default function Attendance() {
     ? Math.round((rows.reduce((s, r) => s + r.attended, 0) / rows.reduce((s, r) => s + r.held, 0)) * 1000) / 10
     : 0;
 
+  const lowSubjects = rows.filter((r) => r.percentage < THRESHOLD);
+
   return (
     <main className="mx-auto max-w-7xl px-6 py-10">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -79,18 +100,38 @@ export default function Attendance() {
           </div>
           <div>
             <h1 className="font-display text-2xl font-semibold text-white">Attendance Monitor</h1>
-            <p className="text-sm text-navy-400">Overall: <span className={`rounded px-1.5 py-0.5 font-semibold ${pctColor(overall)}`}>{overall}%</span></p>
+            <p className="text-sm text-navy-400">
+              Overall: <span className={`rounded px-1.5 py-0.5 font-semibold ${pctColor(overall)}`}>{overall}%</span>
+            </p>
           </div>
         </div>
-        {(user?.role === "teacher" || user?.role === "mentor") && (
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => setMentorMode((m) => !m)}
-            className="rounded-lg border border-navy-700 bg-navy-900 px-4 py-2 text-sm text-navy-200 hover:border-amber-500"
+            onClick={() => exportCsv(rows)}
+            className="flex items-center gap-2 rounded-lg border border-navy-700 bg-navy-900 px-4 py-2 text-sm text-navy-200 hover:border-amber-500"
           >
-            {mentorMode ? "Exit mentor view" : "Mark attendance (mentor)"}
+            <Download className="h-4 w-4" /> Export CSV
           </button>
-        )}
+          {(user?.role === "teacher" || user?.role === "mentor") && (
+            <button
+              onClick={() => setMentorMode((m) => !m)}
+              className="rounded-lg border border-navy-700 bg-navy-900 px-4 py-2 text-sm text-navy-200 hover:border-amber-500"
+            >
+              {mentorMode ? "Exit mentor view" : "Mark attendance (mentor)"}
+            </button>
+          )}
+        </div>
       </div>
+
+      {lowSubjects.length > 0 && (
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-400" />
+          <div>
+            <p className="text-sm font-medium text-red-300">Attendance below {THRESHOLD}% in {lowSubjects.length} subject{lowSubjects.length > 1 ? "s" : ""}</p>
+            <p className="mt-0.5 text-xs text-red-400/80">{lowSubjects.map((s) => s.subject).join(", ")}</p>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
         <div className="overflow-hidden rounded-2xl border border-navy-800 bg-navy-900">
@@ -146,6 +187,18 @@ export default function Attendance() {
             </div>
             <p className="mt-3 text-[11px] text-navy-500">Each cell approximates a day's attendance density for the semester.</p>
           </div>
+        </div>
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-navy-800 bg-navy-900 p-5">
+        <p className="mb-4 text-sm font-medium text-white">Attendance by subject</p>
+        <div className="flex flex-wrap gap-6">
+          {rows.map((r) => (
+            <button key={r.id} onClick={() => setSelected(r)} className="flex flex-col items-center gap-2">
+              <DonutChart percentage={r.percentage} color={donutColor(r.percentage)} />
+              <span className="max-w-[100px] text-center text-xs text-navy-300">{r.subject}</span>
+            </button>
+          ))}
         </div>
       </div>
     </main>
