@@ -213,6 +213,13 @@ app.post("/api/hub/attendance/mark", requireAuth, (req, res) => {
 app.get("/api/hub/mess", (req, res) => {
   res.json(db.data.mess.menu);
 });
+app.get("/api/hub/mess/feedback", (req, res) => {
+  const feedback = db.data.mess.feedback.slice(0, 20).map((f) => {
+    const student = db.data.users.find((u) => u.id === f.studentId);
+    return { ...f, studentName: student ? student.name : "Student" };
+  });
+  res.json(feedback);
+});
 app.post("/api/hub/mess/feedback", requireAuth, (req, res) => {
   const feedback = {
     id: nanoid(8),
@@ -246,6 +253,13 @@ app.post("/api/hub/appointments", requireAuth, (req, res) => {
   db.data.appointments.unshift(appt);
   db.write();
   res.status(201).json(appt);
+});
+app.post("/api/hub/appointments/:id/cancel", requireAuth, (req, res) => {
+  const appt = db.data.appointments.find((a) => a.id === req.params.id && a.studentId === req.user.id);
+  if (!appt) return res.status(404).json({ error: "Appointment not found" });
+  appt.status = "Cancelled";
+  db.write();
+  res.json(appt);
 });
 
 // ---------- HUB: EVENT CATALOG ----------
