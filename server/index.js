@@ -53,6 +53,11 @@ app.get("/api/faculty/students", requireFaculty, (req, res) => {
   const students = db.data.users.filter((u) => u.role === "student").map(safeUser);
   res.json(students);
 });
+app.get("/api/faculty/students/:id", requireFaculty, (req, res) => {
+  const student = db.data.users.find((u) => u.id === req.params.id && u.role === "student");
+  if (!student) return res.status(404).json({ error: "Student not found" });
+  res.json(safeUser(student));
+});
 
 // ---------- LMS ----------
 app.get("/api/lms/courses", requireAuth, (req, res) => {
@@ -150,6 +155,97 @@ app.put("/api/faculty/coe/results/:studentId", requireFaculty, (req, res) => {
   if (req.body.cgpa !== undefined) entry.cgpa = Number(req.body.cgpa);
   db.write();
   res.json(entry);
+});
+// ---------- COE: INTERNAL MARKS ----------
+app.get("/api/coe/internal-marks", requireAuth, (req, res) => {
+  res.json(db.data.coe.internalMarks.find((c) => c.studentId === req.user.id) || { studentId: req.user.id, subjects: [] });
+});
+app.get("/api/faculty/coe/internal-marks/:studentId", requireFaculty, (req, res) => {
+  res.json(db.data.coe.internalMarks.find((c) => c.studentId === req.params.studentId) || { studentId: req.params.studentId, subjects: [] });
+});
+app.put("/api/faculty/coe/internal-marks/:studentId", requireFaculty, (req, res) => {
+  const entry = db.data.coe.internalMarks.find((c) => c.studentId === req.params.studentId);
+  if (!entry) return res.status(404).json({ error: "Record not found" });
+  const subject = entry.subjects.find((s) => s.subject === req.body.subject);
+  if (!subject) return res.status(404).json({ error: "Subject not found" });
+  subject.internal = Number(req.body.internal);
+  db.write();
+  res.json(entry);
+});
+
+// ---------- COE: REGISTERED SUBJECTS & EXAM FEES ----------
+app.get("/api/coe/registered-subjects", requireAuth, (req, res) => {
+  res.json(db.data.coe.registeredSubjects.find((c) => c.studentId === req.user.id) || { studentId: req.user.id, subjects: [] });
+});
+app.get("/api/faculty/coe/registered-subjects/:studentId", requireFaculty, (req, res) => {
+  res.json(db.data.coe.registeredSubjects.find((c) => c.studentId === req.params.studentId) || { studentId: req.params.studentId, subjects: [] });
+});
+app.put("/api/faculty/coe/registered-subjects/:studentId", requireFaculty, (req, res) => {
+  const entry = db.data.coe.registeredSubjects.find((c) => c.studentId === req.params.studentId);
+  if (!entry) return res.status(404).json({ error: "Record not found" });
+  const subject = entry.subjects.find((s) => s.subject === req.body.subject);
+  if (!subject) return res.status(404).json({ error: "Subject not found" });
+  subject.feeStatus = req.body.feeStatus;
+  db.write();
+  res.json(entry);
+});
+
+// ---------- COE: GRADESHEET VERIFICATION ----------
+app.get("/api/coe/gradesheet-status", requireAuth, (req, res) => {
+  res.json(db.data.coe.gradesheetStatus.find((c) => c.studentId === req.user.id) || { studentId: req.user.id, verified: false, verifiedOn: null });
+});
+app.get("/api/faculty/coe/gradesheet-status/:studentId", requireFaculty, (req, res) => {
+  res.json(db.data.coe.gradesheetStatus.find((c) => c.studentId === req.params.studentId) || { studentId: req.params.studentId, verified: false, verifiedOn: null });
+});
+app.post("/api/faculty/coe/gradesheet-status/:studentId/toggle", requireFaculty, (req, res) => {
+  const entry = db.data.coe.gradesheetStatus.find((c) => c.studentId === req.params.studentId);
+  if (!entry) return res.status(404).json({ error: "Record not found" });
+  entry.verified = !entry.verified;
+  entry.verifiedOn = entry.verified ? new Date().toISOString().slice(0, 10) : null;
+  db.write();
+  res.json(entry);
+});
+
+// ---------- COE: PHOTOCOPY & REVALUATION ----------
+app.get("/api/coe/photocopy-requests", requireAuth, (req, res) => {
+  res.json(db.data.coe.photocopyRequests.filter((p) => p.studentId === req.user.id));
+});
+app.post("/api/coe/photocopy-requests", requireAuth, (req, res) => {
+  const request = {
+    id: nanoid(8),
+    studentId: req.user.id,
+    type: req.body.type,
+    subject: req.body.subject,
+    status: "Requested",
+    requestedOn: new Date().toISOString().slice(0, 10)
+  };
+  db.data.coe.photocopyRequests.unshift(request);
+  db.write();
+  res.status(201).json(request);
+});
+app.get("/api/faculty/coe/photocopy-requests", requireFaculty, (req, res) => {
+  const { studentId } = req.query;
+  let list = db.data.coe.photocopyRequests;
+  if (studentId) list = list.filter((p) => p.studentId === studentId);
+  res.json(list);
+});
+app.post("/api/faculty/coe/photocopy-requests/:id/status", requireFaculty, (req, res) => {
+  const request = db.data.coe.photocopyRequests.find((p) => p.id === req.params.id);
+  if (!request) return res.status(404).json({ error: "Request not found" });
+  request.status = req.body.status;
+  db.write();
+  res.json(request);
+});
+
+// ---------- AUTH: CHANGE PASSWORD ----------
+app.post("/api/auth/change-password", requireAuth, (req, res) => {
+  const user = db.data.users.find((u) => u.id === req.user.id);
+  if (!user) return res.status(404).json({ error: "User not found" });
+  if (user.password !== req.body.currentPassword) return res.status(401).json({ error: "Current password is incorrect" });
+  if (!req.body.newPassword || req.body.newPassword.length < 4) return res.status(400).json({ error: "New password must be at least 4 characters" });
+  user.password = req.body.newPassword;
+  db.write();
+  res.json({ ok: true });
 });
 
 // ---------- GATEPASS ----------
