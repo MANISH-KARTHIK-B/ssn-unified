@@ -85,48 +85,40 @@ export default function Mentors() {
               </div>
               {selectedMentor?.id === m.id && (
                 <div className="mt-4 overflow-x-auto">
-                  <table className="w-full border-collapse text-xs">
-                    <thead>
-                      <tr>
-                        <th className="p-1"></th>
-                        {grid.days.map((d) => (
-                          <th key={d} className="p-1 text-navy-400">{d}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {grid.times.map((t) => (
-                        <tr key={t}>
-                          <td className="pr-2 text-navy-500">{t}</td>
-                          {grid.days.map((d) => {
-                            const slot = `${d} ${t}`;
-                            const available = m.slots.includes(slot);
-                            const isSelected = selectedSlot === slot;
-                            return (
-                              <td key={d} className="p-1">
-                                {available ? (
-                                  <button
-                                    onClick={() => setSelectedSlot(slot)}
-                                    className={`h-8 w-16 rounded-md border text-[11px] ${
-                                      isSelected ? "border-amber-500 bg-amber-500/20 text-amber-300" : "border-navy-700 bg-navy-950 text-navy-300 hover:border-navy-500"
-                                    }`}
-                                  >
-                                    {isSelected ? "Selected" : "Open"}
-                                  </button>
-                                ) : (
-                                  <div className="h-8 w-16 rounded-md bg-navy-900/40" />
-                                )}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <div
+                    className="inline-grid gap-2"
+                    style={{ gridTemplateColumns: `56px repeat(${grid.days.length}, 72px)` }}
+                  >
+                    <div />
+                    {grid.days.map((d) => (
+                      <div key={d} className="text-center text-xs font-medium text-navy-400">{d}</div>
+                    ))}
+                    {grid.times.map((t) => (
+                      <React.Fragment key={t}>
+                        <div className="flex items-center text-xs text-navy-500">{t}</div>
+                        {grid.days.map((d) => {
+                          const slot = `${d} ${t}`;
+                          const available = m.slots.includes(slot);
+                          const isSelected = selectedSlot === slot;
+                          return available ? (
+                            <button
+                              key={d}
+                              onClick={() => setSelectedSlot(slot)}
+                              className={`h-8 rounded-md border text-[11px] ${
+                                isSelected ? "border-amber-500 bg-amber-500/20 text-amber-300" : "border-navy-700 bg-navy-950 text-navy-300 hover:border-navy-500"
+                              }`}
+                            >
+                              {isSelected ? "Selected" : "Open"}
+                            </button>
+                          ) : (
+                            <div key={d} className="h-8 rounded-md bg-navy-900/40" />
+                          );
+                        })}
+                      </React.Fragment>
+                    ))}
+                  </div>
                 </div>
-              )}
-            </div>
-          ))}
+              )} 
           <button
             onClick={book}
             disabled={!selectedSlot}
