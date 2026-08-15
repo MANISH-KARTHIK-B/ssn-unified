@@ -4,6 +4,7 @@ import { ClipboardCheck, Download, AlertTriangle } from "lucide-react";
 import { api, API_URL_BASE } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import DonutChart from "../components/DonutChart";
+import StudentPicker from "../components/StudentPicker";
 
 const THRESHOLD = 75;
 
@@ -64,15 +65,31 @@ function exportCsv(rows) {
 
 export default function Attendance() {
   const { user } = useAuth();
+  const isFaculty = user?.role === "faculty";
   const [rows, setRows] = useState([]);
   const [selected, setSelected] = useState(null);
-  const [mentorMode, setMentorMode] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState("");
 
   useEffect(() => {
-    api.get("/api/hub/attendance").then((res) => {
-      setRows(res.data);
-      setSelected(res.data[0] || null);
-    });
+    if (isFaculty) {
+      if (!selectedStudentId) {
+        setRows([]);
+        setSelected(null);
+        return;
+      }
+      api.get(`/api/faculty/attendance/${selectedStudentId}`).then((res) => {
+        setRows(res.data);
+        setSelected(res.data[0] || null);
+      });
+    } else {
+      api.get("/api/hub/attendance").then((res) => {
+        setRows(res.data);
+        setSelected(res.data[0] || null);
+      });
+    }
+  }, [isFaculty, selectedStudentId]);
+
+  useEffect(() => {
     const socket = io(`${API_URL_BASE}/attendance`);
     socket.on("attendance:update", (rec) => {
       setRows((prev) => prev.map((r) => (r.id === rec.id ? rec : r)));
@@ -90,6 +107,7 @@ export default function Attendance() {
     : 0;
 
   const lowSubjects = rows.filter((r) => r.percentage < THRESHOLD);
+  const canEdit = isFaculty && selectedStudentId;
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-10">
@@ -100,107 +118,116 @@ export default function Attendance() {
           </div>
           <div>
             <h1 className="font-display text-2xl font-semibold text-white">Attendance Monitor</h1>
-            <p className="text-sm text-navy-400">
-              Overall: <span className={`rounded px-1.5 py-0.5 font-semibold ${pctColor(overall)}`}>{overall}%</span>
-            </p>
+            {rows.length > 0 && (
+              <p className="text-sm text-navy-400">
+                Overall: <span className={`rounded px-1.5 py-0.5 font-semibold ${pctColor(overall)}`}>{overall}%</span>
+              </p>
+            )}
+            {isFaculty && <p className="text-sm text-navy-400">Faculty mode — pick a student to view or edit their attendance</p>}
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => exportCsv(rows)}
-            className="flex items-center gap-2 rounded-lg border border-navy-700 bg-navy-900 px-4 py-2 text-sm text-navy-200 hover:border-amber-500"
-          >
-            <Download className="h-4 w-4" /> Export CSV
-          </button>
-          {(user?.role === "teacher" || user?.role === "mentor") && (
+          {isFaculty && <StudentPicker value={selectedStudentId} onChange={setSelectedStudentId} />}
+          {rows.length > 0 && (
             <button
-              onClick={() => setMentorMode((m) => !m)}
-              className="rounded-lg border border-navy-700 bg-navy-900 px-4 py-2 text-sm text-navy-200 hover:border-amber-500"
+              onClick={() => exportCsv(rows)}
+              className="flex items-center gap-2 rounded-lg border border-navy-700 bg-navy-900 px-4 py-2 text-sm text-navy-200 hover:border-amber-500"
             >
-              {mentorMode ? "Exit mentor view" : "Mark attendance (mentor)"}
+              <Download className="h-4 w-4" /> Export CSV
             </button>
           )}
         </div>
       </div>
 
-      {lowSubjects.length > 0 && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
-          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-400" />
-          <div>
-            <p className="text-sm font-medium text-red-300">Attendance below {THRESHOLD}% in {lowSubjects.length} subject{lowSubjects.length > 1 ? "s" : ""}</p>
-            <p className="mt-0.5 text-xs text-red-400/80">{lowSubjects.map((s) => s.subject).join(", ")}</p>
-          </div>
+      {isFaculty && !selectedStudentId ? (
+        <div className="rounded-2xl border border-dashed border-navy-800 bg-navy-900/40 py-16 text-center text-sm text-navy-500">
+          Select a student above to view or edit their attendance record.
         </div>
-      )}
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
-        <div className="overflow-hidden rounded-2xl border border-navy-800 bg-navy-900">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-navy-800 text-left text-xs uppercase tracking-wide text-navy-500">
-                <th className="px-4 py-3">Subject</th>
-                <th className="px-4 py-3">Held</th>
-                <th className="px-4 py-3">Attended</th>
-                <th className="px-4 py-3">%</th>
-                {mentorMode && <th className="px-4 py-3">Mark today</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr
-                  key={r.id}
-                  onClick={() => setSelected(r)}
-                  className={`cursor-pointer border-b border-navy-800/60 last:border-0 hover:bg-navy-800/40 ${selected?.id === r.id ? "bg-navy-800/60" : ""}`}
-                >
-                  <td className="px-4 py-3 text-navy-100">{r.subject}</td>
-                  <td className="px-4 py-3 text-navy-400">{r.held}</td>
-                  <td className="px-4 py-3 text-navy-400">{r.attended}</td>
-                  <td className="px-4 py-3">
-                    <span className={`rounded px-1.5 py-0.5 font-semibold ${pctColor(r.percentage)}`}>{r.percentage}%</span>
-                  </td>
-                  {mentorMode && (
-                    <td className="px-4 py-3">
-                      <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                        <button onClick={() => markAttendance(r.id, true)} className="rounded-md bg-green-500/15 px-2 py-1 text-xs text-green-400 hover:bg-green-500/25">Present</button>
-                        <button onClick={() => markAttendance(r.id, false)} className="rounded-md bg-red-500/15 px-2 py-1 text-xs text-red-400 hover:bg-red-500/25">Absent</button>
-                      </div>
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {rows.length === 0 && <p className="p-6 text-sm text-navy-500">Loading attendance…</p>}
-        </div>
-
-        <div className="space-y-6">
-          <WhatIf subject={selected} />
-          <div className="rounded-xl border border-navy-800 bg-navy-900 p-4">
-            <p className="mb-3 text-sm font-medium text-white">Semester calendar heatmap</p>
-            <div className="grid grid-cols-7 gap-1.5">
-              {Array.from({ length: 91 }).map((_, i) => {
-                const intensity = Math.random();
-                const color =
-                  intensity > 0.7 ? "bg-green-500/70" : intensity > 0.4 ? "bg-amber-500/50" : "bg-navy-800";
-                return <div key={i} className={`h-4 w-4 rounded-sm ${color}`} title={`Day ${i + 1}`} />;
-              })}
+      ) : (
+        <>
+          {lowSubjects.length > 0 && (
+            <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-400" />
+              <div>
+                <p className="text-sm font-medium text-red-300">Attendance below {THRESHOLD}% in {lowSubjects.length} subject{lowSubjects.length > 1 ? "s" : ""}</p>
+                <p className="mt-0.5 text-xs text-red-400/80">{lowSubjects.map((s) => s.subject).join(", ")}</p>
+              </div>
             </div>
-            <p className="mt-3 text-[11px] text-navy-500">Each cell approximates a day's attendance density for the semester.</p>
-          </div>
-        </div>
-      </div>
+          )}
 
-      <div className="mt-6 rounded-2xl border border-navy-800 bg-navy-900 p-5">
-        <p className="mb-4 text-sm font-medium text-white">Attendance by subject</p>
-        <div className="flex flex-wrap gap-6">
-          {rows.map((r) => (
-            <button key={r.id} onClick={() => setSelected(r)} className="flex flex-col items-center gap-2">
-              <DonutChart percentage={r.percentage} color={donutColor(r.percentage)} />
-              <span className="max-w-[100px] text-center text-xs text-navy-300">{r.subject}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
+            <div className="overflow-hidden rounded-2xl border border-navy-800 bg-navy-900">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-navy-800 text-left text-xs uppercase tracking-wide text-navy-500">
+                    <th className="px-4 py-3">Subject</th>
+                    <th className="px-4 py-3">Held</th>
+                    <th className="px-4 py-3">Attended</th>
+                    <th className="px-4 py-3">%</th>
+                    {canEdit && <th className="px-4 py-3">Mark today</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((r) => (
+                    <tr
+                      key={r.id}
+                      onClick={() => setSelected(r)}
+                      className={`cursor-pointer border-b border-navy-800/60 last:border-0 hover:bg-navy-800/40 ${selected?.id === r.id ? "bg-navy-800/60" : ""}`}
+                    >
+                      <td className="px-4 py-3 text-navy-100">{r.subject}</td>
+                      <td className="px-4 py-3 text-navy-400">{r.held}</td>
+                      <td className="px-4 py-3 text-navy-400">{r.attended}</td>
+                      <td className="px-4 py-3">
+                        <span className={`rounded px-1.5 py-0.5 font-semibold ${pctColor(r.percentage)}`}>{r.percentage}%</span>
+                      </td>
+                      {canEdit && (
+                        <td className="px-4 py-3">
+                          <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                            <button onClick={() => markAttendance(r.id, true)} className="rounded-md bg-green-500/15 px-2 py-1 text-xs text-green-400 hover:bg-green-500/25">Present</button>
+                            <button onClick={() => markAttendance(r.id, false)} className="rounded-md bg-red-500/15 px-2 py-1 text-xs text-red-400 hover:bg-red-500/25">Absent</button>
+                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {rows.length === 0 && <p className="p-6 text-sm text-navy-500">Loading attendance…</p>}
+            </div>
+
+            <div className="space-y-6">
+              {!isFaculty && <WhatIf subject={selected} />}
+              {!isFaculty && (
+                <div className="rounded-xl border border-navy-800 bg-navy-900 p-4">
+                  <p className="mb-3 text-sm font-medium text-white">Semester calendar heatmap</p>
+                  <div className="grid grid-cols-7 gap-1.5">
+                    {Array.from({ length: 91 }).map((_, i) => {
+                      const intensity = Math.random();
+                      const color = intensity > 0.7 ? "bg-green-500/70" : intensity > 0.4 ? "bg-amber-500/50" : "bg-navy-800";
+                      return <div key={i} className={`h-4 w-4 rounded-sm ${color}`} title={`Day ${i + 1}`} />;
+                    })}
+                  </div>
+                  <p className="mt-3 text-[11px] text-navy-500">Each cell approximates a day's attendance density for the semester.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {rows.length > 0 && (
+            <div className="mt-6 rounded-2xl border border-navy-800 bg-navy-900 p-5">
+              <p className="mb-4 text-sm font-medium text-white">Attendance by subject</p>
+              <div className="flex flex-wrap gap-6">
+                {rows.map((r) => (
+                  <button key={r.id} onClick={() => setSelected(r)} className="flex flex-col items-center gap-2">
+                    <DonutChart percentage={r.percentage} color={donutColor(r.percentage)} />
+                    <span className="max-w-[100px] text-center text-xs text-navy-300">{r.subject}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </main>
   );
 }
