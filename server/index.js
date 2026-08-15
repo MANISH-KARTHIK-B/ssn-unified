@@ -8,11 +8,6 @@ import { initDb } from "./db.js";
 import { attachUser, requireAuth, signToken } from "./auth.js";
 
 const PORT = process.env.PORT || 4000;
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-const __resetDir = path.dirname(fileURLToPath(import.meta.url));
-try { fs.unlinkSync(path.join(__resetDir, "data", "db.json")); } catch {}
 const db = await initDb();
 
 const app = express();
