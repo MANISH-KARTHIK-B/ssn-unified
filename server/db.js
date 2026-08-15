@@ -224,6 +224,25 @@ export async function initDb() {
             { subject: "Signals and Systems", cat1: 33, cat2: 36, max: 50 }
           ]
         })),
+        internalMarks: students.map((s) => ({
+          studentId: s.id,
+          subjects: [
+            { subject: "Electronic Circuits", internal: 46, max: 50 },
+            { subject: "OOPS and Data Structures", internal: 41, max: 50 },
+            { subject: "Signals and Systems", internal: 38, max: 50 }
+          ]
+        })),
+        registeredSubjects: students.map((s) => ({
+          studentId: s.id,
+          subjects: [
+            { subject: "Electronic Circuits", code: "UEC3301", credits: 4, examFee: 250, feeStatus: "Paid" },
+            { subject: "OOPS and Data Structures", code: "UEC3302", credits: 4, examFee: 250, feeStatus: "Paid" },
+            { subject: "Signals and Systems", code: "UEC3303", credits: 3, examFee: 200, feeStatus: "Due" }
+          ]
+        })),
+        gradesheetStatus: students.map((s) => ({ studentId: s.id, verified: false, verifiedOn: null })),
+        photocopyRequests: [],
+        timetable: [
         timetable: [
           { date: "2026-08-10", subject: "Electronic Circuits", time: "10:00 AM - 01:00 PM", hall: "Hall A1", seat: "A-14" },
           { date: "2026-08-12", subject: "OOPS and Data Structures", time: "10:00 AM - 01:00 PM", hall: "Hall B2", seat: "B-07" }
