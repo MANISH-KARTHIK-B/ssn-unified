@@ -18,8 +18,6 @@ export function verifyToken(token) {
   }
 }
 
-// Middleware: attaches req.user if a valid token is present (query param or Authorization header).
-// Does NOT block the request if missing - each satellite app decides whether to fall back to local login.
 export function attachUser(req, res, next) {
   const headerToken = (req.headers.authorization || "").replace("Bearer ", "");
   const token = req.query.token || headerToken;
@@ -30,5 +28,11 @@ export function attachUser(req, res, next) {
 
 export function requireAuth(req, res, next) {
   if (!req.user) return res.status(401).json({ error: "Not authenticated" });
+  next();
+}
+
+export function requireFaculty(req, res, next) {
+  if (!req.user) return res.status(401).json({ error: "Not authenticated" });
+  if (req.user.role !== "faculty") return res.status(403).json({ error: "Faculty access only" });
   next();
 }
