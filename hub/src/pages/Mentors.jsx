@@ -83,6 +83,7 @@ export default function Mentors() {
                   Select
                 </button>
               </div>
+
               {selectedMentor?.id === m.id && (
                 <div className="mt-4 overflow-x-auto">
                   <div
@@ -118,7 +119,9 @@ export default function Mentors() {
                     ))}
                   </div>
                 </div>
-              )} 
+              )}
+            </div>
+          ))}
           <button
             onClick={book}
             disabled={!selectedSlot}
