@@ -59,6 +59,8 @@ function Expandable({ label, icon: Icon, items }) {
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
+  const isFaculty = user?.role === "faculty";
+
   return (
     <aside className="flex h-screen w-72 shrink-0 flex-col overflow-y-auto border-r border-slate-800 bg-slate-900 px-4 py-6">
       <p className="mb-6 px-2 font-display text-lg font-bold text-white">SSN - COE</p>
@@ -69,8 +71,14 @@ export default function Sidebar() {
         </div>
         <div>
           <p className="text-sm font-medium text-white">{user?.name}</p>
-          <p className="text-xs text-slate-400">{user?.regNo}</p>
-          <p className="text-xs text-slate-500">{user?.program?.replace("B.E. ", "B.E. ")}</p>
+          {isFaculty ? (
+            <p className="text-xs text-cobalt-400">Faculty · {user?.department}</p>
+          ) : (
+            <>
+              <p className="text-xs text-slate-400">{user?.regNo}</p>
+              <p className="text-xs text-slate-500">{user?.program}</p>
+            </>
+          )}
         </div>
       </div>
 
