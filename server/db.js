@@ -307,7 +307,8 @@ export async function initDb() {
           ]
         })),
         documentRequests: [],
-        hostel: students.map((s) => ({ studentId: s.id, block: "Block C", room: "C-214", roomType: "Double sharing", status: "Allocated" }))
+        hostel: students.map((s) => ({ studentId: s.id, block: "Block C", room: "C-214", roomType: "Double sharing", status: "Allocated" })),
+        grievances: []
       }
     };
     await db.write();
