@@ -5,7 +5,7 @@ import http from "http";
 import { Server } from "socket.io";
 import { nanoid } from "nanoid";
 import { initDb } from "./db.js";
-import { attachUser, requireAuth, requireFaculty, signToken } from "./auth.js";
+import { attachUser, requireAuth, requireFaculty, requireWarden, signToken } from "./auth.js";
 
 const PORT = process.env.PORT || 4000;
 const db = await initDb();
@@ -254,7 +254,7 @@ app.get("/api/gatepass", requireAuth, (req, res) => {
 });
 app.post("/api/gatepass", requireAuth, (req, res) => {
   const { type, departure, return: returnTime, reason } = req.body;
-  const pass = { id: nanoid(8), studentId: req.user.id, type, departure, return: returnTime, reason: reason || "", status: "Pending", approvals: { mentor: "Pending", security: "Not Required", warden: "Not Required" } };
+  const pass = { id: nanoid(8), studentId: req.user.id, type, departure, return: returnTime, reason: reason || "", status: "Pending", approvals: { mentor: "Pending", security: "Not Required", warden: "Pending" } };
   db.data.gatepass.unshift(pass);
   db.write();
   res.status(201).json(pass);
@@ -272,6 +272,25 @@ app.post("/api/faculty/gatepass/:id/decision", requireFaculty, (req, res) => {
   if (!pass) return res.status(404).json({ error: "Pass not found" });
   const approve = req.body.decision === "approve";
   pass.approvals.mentor = approve ? "Approved" : "Rejected";
+  // Mentor approval alone doesn't finalize the pass - it still needs the warden.
+  pass.status = approve ? "Pending" : "Cancelled";
+  db.write();
+  res.json(pass);
+});
+
+// ---------- WARDEN: GATEPASS ----------
+app.get("/api/warden/gatepass", requireWarden, (req, res) => {
+  // Passes the warden should act on: mentor already approved.
+  res.json(db.data.gatepass.filter((p) => p.approvals.mentor === "Approved"));
+});
+app.post("/api/warden/gatepass/:id/decision", requireWarden, (req, res) => {
+  const pass = db.data.gatepass.find((p) => p.id === req.params.id);
+  if (!pass) return res.status(404).json({ error: "Pass not found" });
+  if (pass.approvals.mentor !== "Approved") {
+    return res.status(400).json({ error: "Mentor has not approved this pass yet" });
+  }
+  const approve = req.body.decision === "approve";
+  pass.approvals.warden = approve ? "Approved" : "Rejected";
   pass.status = approve ? "Approved" : "Cancelled";
   db.write();
   res.json(pass);
