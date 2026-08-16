@@ -402,6 +402,24 @@ app.post("/api/erp/documents", requireAuth, (req, res) => {
 app.get("/api/erp/hostel", requireAuth, (req, res) => {
   res.json(db.data.erp.hostel.find((h) => h.studentId === req.user.id) || null);
 });
+// ---------- ERP: GRIEVANCES ----------
+app.get("/api/erp/grievances", requireAuth, (req, res) => {
+  res.json(db.data.erp.grievances.filter((g) => g.studentId === req.user.id));
+});
+app.post("/api/erp/grievances", requireAuth, (req, res) => {
+  const grievance = {
+    id: nanoid(8),
+    studentId: req.user.id,
+    category: req.body.category,
+    subject: req.body.subject,
+    description: req.body.description,
+    status: "Submitted",
+    submittedOn: new Date().toISOString().slice(0, 10)
+  };
+  db.data.erp.grievances.unshift(grievance);
+  db.write();
+  res.status(201).json(grievance);
+});
 
 // ---------- HUB: ATTENDANCE ----------
 app.get("/api/hub/attendance", requireAuth, (req, res) => {
