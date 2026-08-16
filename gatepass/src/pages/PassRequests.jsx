@@ -137,6 +137,19 @@ export default function PassRequests() {
               <div className="flex justify-between"><dt className="text-ink-500">Security</dt><dd>{viewing.approvals.security}</dd></div>
               <div className="flex justify-between"><dt className="text-ink-500">Warden</dt><dd>{viewing.approvals.warden}</dd></div>
             </dl>
+
+            {viewing.status === "Approved" && (
+              <div className="mt-5 flex flex-col items-center gap-2 rounded-xl border border-gray-100 bg-gray-50 p-4">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
+                    JSON.stringify({ passId: viewing.id, student: user?.regNo, type: viewing.type, departure: viewing.departure, return: viewing.return })
+                  )}`}
+                  alt="Gate pass QR code"
+                  className="h-40 w-40"
+                />
+                <p className="text-xs text-ink-500">Show this QR code at the gate</p>
+              </div>
+            )}
           </div>
         </div>
       )}
