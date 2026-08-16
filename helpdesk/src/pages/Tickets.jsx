@@ -34,6 +34,8 @@ export default function Tickets() {
         ticket={selected}
         onBack={() => setSelected(null)}
         onUpdate={(t) => { setSelected(t); setTickets((prev) => prev.map((x) => (x.id === t.id ? t : x))); }}
+        replyUrl={`/api/helpdesk/tickets/${selected.id}/reply`}
+        isFaculty={false}
       />
     );
   }
