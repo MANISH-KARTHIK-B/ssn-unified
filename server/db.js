@@ -243,7 +243,6 @@ export async function initDb() {
         gradesheetStatus: students.map((s) => ({ studentId: s.id, verified: false, verifiedOn: null })),
         photocopyRequests: [],
         timetable: [
-        timetable: [
           { date: "2026-08-10", subject: "Electronic Circuits", time: "10:00 AM - 01:00 PM", hall: "Hall A1", seat: "A-14" },
           { date: "2026-08-12", subject: "OOPS and Data Structures", time: "10:00 AM - 01:00 PM", hall: "Hall B2", seat: "B-07" }
         ],
