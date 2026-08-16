@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import {
-  MonitorPlay, ShoppingCart, Archive, BookOpenCheck, GraduationCap, Search
+  MonitorPlay, ShoppingCart, Archive, BookOpenCheck, GraduationCap, Search, BookmarkPlus, Check
 } from "lucide-react";
 import { api, HUB_URL } from "../lib/api";
 import NoticeTicker from "../components/NoticeTicker";
@@ -14,17 +14,39 @@ const QUICK_LINKS = [
   { label: "NPTEL", icon: GraduationCap }
 ];
 
+const GENRES = ["All", "Computer Science", "Electronics", "Mechanical", "Civil", "Mathematics"];
+
 export default function Opac({ onNavigateAccount }) {
   const [q, setQ] = useState("");
+  const [genre, setGenre] = useState("All");
   const [results, setResults] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [reserved, setReserved] = useState({});
 
-  async function search(e) {
-    e.preventDefault();
+  async function runSearch(query, g) {
     setBusy(true);
-    const res = await api.get("/api/library/catalog", { params: { q } });
+    const res = await api.get("/api/library/catalog", { params: { q: query, genre: g } });
     setResults(res.data);
     setBusy(false);
+  }
+
+  function search(e) {
+    e.preventDefault();
+    runSearch(q, genre);
+  }
+
+  function pickGenre(g) {
+    setGenre(g);
+    runSearch(q, g);
+  }
+
+  async function reserve(bookId) {
+    try {
+      await api.post("/api/library/reserve", { bookId });
+      setReserved((prev) => ({ ...prev, [bookId]: true }));
+    } catch {
+      setReserved((prev) => ({ ...prev, [bookId]: true }));
+    }
   }
 
   return (
@@ -72,6 +94,19 @@ export default function Opac({ onNavigateAccount }) {
             <Search className="h-4 w-4" /> Search
           </button>
         </form>
+        <div className="mb-4 flex flex-wrap gap-2">
+          {GENRES.map((g) => (
+            <button
+              key={g}
+              onClick={() => pickGenre(g)}
+              className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                genre === g ? "border-ocean-600 bg-ocean-600 text-white" : "border-ocean-200 bg-white text-ocean-700 hover:border-ocean-400"
+              }`}
+            >
+              {g}
+            </button>
+          ))}
+        </div>
         <div className="mb-6 flex gap-4 text-sm text-ocean-600">
           <a href="#" className="hover:underline">Advanced search</a> |
           <a href="#" className="hover:underline">Tag cloud</a> |
@@ -86,7 +121,9 @@ export default function Opac({ onNavigateAccount }) {
                 <tr className="border-b border-ocean-100 bg-ocean-50 text-left text-xs uppercase tracking-wide text-ocean-600">
                   <th className="px-4 py-3">Title</th>
                   <th className="px-4 py-3">Author</th>
+                  <th className="px-4 py-3">Genre</th>
                   <th className="px-4 py-3">Availability</th>
+                  <th className="px-4 py-3"></th>
                 </tr>
               </thead>
               <tbody>
@@ -94,15 +131,32 @@ export default function Opac({ onNavigateAccount }) {
                   <tr key={b.id} className="border-b border-gray-50 last:border-0">
                     <td className="px-4 py-3 font-medium text-ocean-900">{b.title}</td>
                     <td className="px-4 py-3 text-ocean-700">{b.author}</td>
+                    <td className="px-4 py-3 text-ocean-600">{b.genre}</td>
                     <td className="px-4 py-3">
                       <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${b.available ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"}`}>
                         {b.available ? `${b.copies} available` : "Not available"}
                       </span>
                     </td>
+                    <td className="px-4 py-3">
+                      {!b.available && (
+                        reserved[b.id] ? (
+                          <span className="flex items-center gap-1 text-xs font-semibold text-ocean-600">
+                            <Check className="h-3.5 w-3.5" /> Reserved
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => reserve(b.id)}
+                            className="flex items-center gap-1 rounded-md border border-ocean-200 px-2.5 py-1.5 text-xs font-medium text-ocean-700 hover:border-ocean-500"
+                          >
+                            <BookmarkPlus className="h-3.5 w-3.5" /> Reserve
+                          </button>
+                        )
+                      )}
+                    </td>
                   </tr>
                 ))}
                 {results.length === 0 && (
-                  <tr><td colSpan={3} className="px-4 py-6 text-center text-ocean-500">No matches found in the catalog.</td></tr>
+                  <tr><td colSpan={5} className="px-4 py-6 text-center text-ocean-500">No matches found in the catalog.</td></tr>
                 )}
               </tbody>
             </table>
