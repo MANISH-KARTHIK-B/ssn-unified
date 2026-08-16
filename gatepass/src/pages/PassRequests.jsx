@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Plus, Eye, X, CalendarClock } from "lucide-react";
+import { Plus, Eye, X, CalendarClock, ArrowUpRight } from "lucide-react";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import NewRequestModal from "../components/NewRequestModal";
@@ -14,12 +14,18 @@ const STATUS_STYLE = {
 const APPROVAL_STYLE = {
   Approved: "bg-green-50 text-green-700",
   Pending: "bg-amber-50 text-amber-700",
+  Rejected: "bg-red-50 text-red-600",
   "Not Required": "bg-gray-100 text-gray-500"
 };
 
 function fmt(dt) {
   if (!dt) return "—";
   return new Date(dt).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
+function fmtShort(dt) {
+  if (!dt) return "—";
+  return new Date(dt).toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
 }
 
 export default function PassRequests() {
@@ -50,72 +56,67 @@ export default function PassRequests() {
     <div className="flex-1 px-8 py-8">
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="font-display text-2xl font-bold text-ink-900">Pass Requests</h1>
+          <h1 className="font-display text-2xl font-bold text-brand-900">Pass Requests</h1>
           <p className="text-sm text-ink-500">{user?.name?.toUpperCase()} — {user?.regNo}</p>
         </div>
         <button
           onClick={() => setShowNew(true)}
-          className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-600"
+          className="flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700"
         >
           <Plus className="h-4 w-4" /> New Request
         </button>
       </div>
 
-      <div className="mb-6 w-fit rounded-2xl border border-gray-200 bg-white p-5">
-        <div className="flex items-center gap-2 text-sm text-ink-500">
-          <CalendarClock className="h-4 w-4" /> WDP This Month
+      <div className="mb-6 flex w-fit items-center gap-4 rounded-2xl border border-brand-100 bg-white p-5">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-600">
+          <CalendarClock className="h-5 w-5" />
         </div>
-        <p className="mt-2 font-display text-4xl font-bold text-ink-900">{wdpThisMonth}</p>
-        <p className="text-xs text-ink-500">Working Day Passes used this month</p>
+        <div>
+          <p className="text-xs uppercase tracking-wide text-ink-500">WDP this month</p>
+          <p className="font-display text-3xl font-bold text-brand-900">{wdpThisMonth}</p>
+        </div>
       </div>
 
-      <div className="rounded-2xl border border-gray-200 bg-white">
-        <div className="border-b border-gray-100 px-6 py-4">
-          <p className="font-display font-semibold text-ink-900">Request History</p>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 text-left text-xs uppercase tracking-wide text-ink-500">
-                <th className="px-6 py-3">Type</th>
-                <th className="px-6 py-3">Departure</th>
-                <th className="px-6 py-3">Return</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3">Approvals</th>
-                <th className="px-6 py-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {passes.map((p) => (
-                <tr key={p.id} className="border-b border-gray-50 last:border-0">
-                  <td className="px-6 py-4">
-                    <p className="font-medium text-ink-900">{p.type}</p>
-                    {p.reason && <p className="text-xs text-ink-500">{p.reason}</p>}
-                  </td>
-                  <td className="px-6 py-4 text-ink-700">{fmt(p.departure)}</td>
-                  <td className="px-6 py-4 text-ink-700">{fmt(p.return)}</td>
-                  <td className="px-6 py-4">
-                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${STATUS_STYLE[p.status]}`}>{p.status}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex gap-1.5">
-                      {[["M", p.approvals.mentor], ["S", p.approvals.security], ["W", p.approvals.warden]].map(([k, v]) => (
-                        <span key={k} className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${APPROVAL_STYLE[v]}`}>{k}: {v}</span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <button onClick={() => setViewing(p)} className="flex items-center gap-1.5 rounded-md border border-gray-200 px-2.5 py-1.5 text-xs text-ink-700 hover:border-brand-500">
-                      <Eye className="h-3.5 w-3.5" /> View
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {!loading && passes.length === 0 && <p className="p-6 text-sm text-ink-500">No pass requests yet.</p>}
-        </div>
+      <p className="mb-3 font-display text-sm font-semibold text-ink-700">Request history</p>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {passes.map((p) => (
+          <div key={p.id} className="relative flex overflow-hidden rounded-2xl border border-brand-100 bg-white shadow-sm transition hover:shadow-md">
+            {/* stub */}
+            <div className="flex w-16 shrink-0 flex-col items-center justify-center gap-1 bg-brand-700 py-4 text-white">
+              <span className="text-[10px] font-semibold uppercase tracking-wide opacity-80">{fmtShort(p.departure)}</span>
+              <div className="h-6 w-px bg-white/25" />
+              <span className="text-[10px] font-semibold uppercase tracking-wide opacity-80">{fmtShort(p.return)}</span>
+            </div>
+            {/* perforation */}
+            <div className="relative w-0 border-l-2 border-dashed border-brand-100">
+              <span className="absolute -top-2 -left-2 h-4 w-4 rounded-full bg-[#F4F7FC]" />
+              <span className="absolute -bottom-2 -left-2 h-4 w-4 rounded-full bg-[#F4F7FC]" />
+            </div>
+            {/* body */}
+            <div className="flex-1 p-4">
+              <div className="mb-2 flex items-start justify-between gap-2">
+                <p className="font-display text-sm font-bold text-ink-900">{p.type}</p>
+                <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${STATUS_STYLE[p.status]}`}>{p.status}</span>
+              </div>
+              {p.reason && <p className="mb-3 text-xs text-ink-500">{p.reason}</p>}
+              <div className="mb-3 flex gap-1.5">
+                {[["M", p.approvals.mentor], ["S", p.approvals.security], ["W", p.approvals.warden]].map(([k, v]) => (
+                  <span key={k} className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${APPROVAL_STYLE[v]}`}>{k}: {v}</span>
+                ))}
+              </div>
+              <button onClick={() => setViewing(p)} className="flex items-center gap-1 text-xs font-semibold text-brand-600 hover:text-brand-700">
+                View pass <ArrowUpRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
+      {!loading && passes.length === 0 && (
+        <div className="rounded-2xl border border-dashed border-brand-100 bg-white p-10 text-center">
+          <p className="text-sm text-ink-500">No pass requests yet. Tap "New Request" to apply for one.</p>
+        </div>
+      )}
 
       {showNew && (
         <NewRequestModal onClose={() => setShowNew(false)} onCreated={(p) => setPasses((prev) => [p, ...prev])} />
@@ -123,32 +124,40 @@ export default function PassRequests() {
 
       {viewing && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 px-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
-            <div className="mb-4 flex items-center justify-between">
-              <p className="font-display text-lg font-bold text-ink-900">{viewing.type}</p>
-              <button onClick={() => setViewing(null)}><X className="h-5 w-5 text-ink-500" /></button>
+          <div className="w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between bg-brand-700 px-6 py-4">
+              <p className="font-display text-lg font-bold text-white">{viewing.type}</p>
+              <button onClick={() => setViewing(null)}><X className="h-5 w-5 text-white/80" /></button>
             </div>
-            <dl className="space-y-2 text-sm">
-              <div className="flex justify-between"><dt className="text-ink-500">Departure</dt><dd>{fmt(viewing.departure)}</dd></div>
-              <div className="flex justify-between"><dt className="text-ink-500">Return</dt><dd>{fmt(viewing.return)}</dd></div>
-              <div className="flex justify-between"><dt className="text-ink-500">Status</dt><dd>{viewing.status}</dd></div>
-              <div className="flex justify-between"><dt className="text-ink-500">Reason</dt><dd>{viewing.reason || "—"}</dd></div>
-              <div className="flex justify-between"><dt className="text-ink-500">Mentor</dt><dd>{viewing.approvals.mentor}</dd></div>
-              <div className="flex justify-between"><dt className="text-ink-500">Security</dt><dd>{viewing.approvals.security}</dd></div>
-              <div className="flex justify-between"><dt className="text-ink-500">Warden</dt><dd>{viewing.approvals.warden}</dd></div>
-            </dl>
+            <div className="p-6">
+              <dl className="space-y-2 text-sm">
+                <div className="flex justify-between"><dt className="text-ink-500">Departure</dt><dd className="font-medium text-ink-900">{fmt(viewing.departure)}</dd></div>
+                <div className="flex justify-between"><dt className="text-ink-500">Return</dt><dd className="font-medium text-ink-900">{fmt(viewing.return)}</dd></div>
+                <div className="flex justify-between"><dt className="text-ink-500">Status</dt><dd className="font-medium text-ink-900">{viewing.status}</dd></div>
+                <div className="flex justify-between"><dt className="text-ink-500">Reason</dt><dd className="font-medium text-ink-900">{viewing.reason || "—"}</dd></div>
+                <div className="flex justify-between"><dt className="text-ink-500">Mentor</dt><dd className="font-medium text-ink-900">{viewing.approvals.mentor}</dd></div>
+                <div className="flex justify-between"><dt className="text-ink-500">Security</dt><dd className="font-medium text-ink-900">{viewing.approvals.security}</dd></div>
+                <div className="flex justify-between"><dt className="text-ink-500">Warden</dt><dd className="font-medium text-ink-900">{viewing.approvals.warden}</dd></div>
+              </dl>
+            </div>
 
             {viewing.status === "Approved" && (
-              <div className="mt-5 flex flex-col items-center gap-2 rounded-xl border border-gray-100 bg-gray-50 p-4">
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
-                    JSON.stringify({ passId: viewing.id, student: user?.regNo, type: viewing.type, departure: viewing.departure, return: viewing.return })
-                  )}`}
-                  alt="Gate pass QR code"
-                  className="h-40 w-40"
-                />
-                <p className="text-xs text-ink-500">Show this QR code at the gate</p>
-              </div>
+              <>
+                <div className="relative border-t-2 border-dashed border-brand-100">
+                  <span className="absolute -top-2 -left-2 h-4 w-4 rounded-full bg-black/40" />
+                  <span className="absolute -top-2 -right-2 h-4 w-4 rounded-full bg-black/40" />
+                </div>
+                <div className="flex flex-col items-center gap-2 bg-brand-50 p-6">
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
+                      JSON.stringify({ passId: viewing.id, student: user?.regNo, type: viewing.type, departure: viewing.departure, return: viewing.return })
+                    )}`}
+                    alt="Gate pass QR code"
+                    className="h-40 w-40 rounded-lg bg-white p-2 shadow-sm"
+                  />
+                  <p className="text-xs font-medium text-brand-700">Show this QR code at the gate</p>
+                </div>
+              </>
             )}
           </div>
         </div>
