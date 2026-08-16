@@ -36,3 +36,9 @@ export function requireFaculty(req, res, next) {
   if (req.user.role !== "faculty") return res.status(403).json({ error: "Faculty access only" });
   next();
 }
+
+export function requireWarden(req, res, next) {
+  if (!req.user) return res.status(401).json({ error: "Not authenticated" });
+  if (req.user.role !== "warden") return res.status(403).json({ error: "Warden access only" });
+  next();
+}
