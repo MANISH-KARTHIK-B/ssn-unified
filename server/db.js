@@ -69,6 +69,22 @@ function buildFaculty() {
   ];
 }
 
+// Hostel warden account - approves gatepass requests after the mentor.
+function buildWarden() {
+  return [
+    {
+      id: "warden1",
+      username: "warden1",
+      password: "demo1234",
+      role: "warden",
+      name: "Mr. Hostel Warden",
+      department: "Hostel Administration",
+      email: "warden1@example-college.edu",
+      avatar: "generic"
+    }
+  ];
+}
+
 const COURSE_BANNERS = ["hexagon", "diamond", "wave", "grid", "plaid", "circuit"];
 const COURSE_SEED = [
   { code: "UCE3386", title: "Design Thinking and Innovation", dept: "Common", term: "AY 2026-27 Term I" },
@@ -134,7 +150,7 @@ function buildGatepass(studentId, seedIndex) {
     departure: d[0],
     return: d[1],
     status: "Pending",
-    approvals: { mentor: "Pending", security: "Not Required", warden: "Not Required" }
+    approvals: { mentor: "Pending", security: "Not Required", warden: "Pending" }
   }));
 }
 
@@ -203,7 +219,7 @@ export async function initDb() {
   if (!db.data || !db.data.users) {
     const students = buildStudents();
     db.data = {
-      users: [...students, ...buildFaculty()],
+      users: [...students, ...buildFaculty(), ...buildWarden()],
       courses: buildCourses(),
       lmsSubmissions: [],
       gatepass: students.flatMap((s, i) => buildGatepass(s.id, i)),
