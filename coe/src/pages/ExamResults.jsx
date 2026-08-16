@@ -7,7 +7,7 @@ import FacultyBar from "../components/FacultyBar";
 
 const GRADES = ["O", "A+", "A", "B+", "B", "C", "U"];
 
-export default function ExamResults() {
+export default function ExamResults() { 
   const { user } = useAuth();
   const isFaculty = user?.role === "faculty";
   const { selectedStudentId } = useFaculty();
