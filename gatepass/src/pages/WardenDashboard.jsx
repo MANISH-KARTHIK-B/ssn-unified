@@ -33,12 +33,12 @@ export default function WardenDashboard() {
   return (
     <div className="flex-1 px-8 py-8">
       <div className="mb-6">
-        <h1 className="font-display text-2xl font-bold text-ink-900">Warden Approvals</h1>
+        <h1 className="font-display text-2xl font-bold text-brand-900">Warden Approvals</h1>
         <p className="text-sm text-ink-500">{user?.name} — Hostel Administration</p>
       </div>
 
-      <div className="rounded-2xl border border-gray-200 bg-white">
-        <div className="border-b border-gray-100 px-6 py-4">
+      <div className="rounded-2xl border border-brand-100 bg-white">
+        <div className="border-b border-brand-50 px-6 py-4">
           <p className="font-display font-semibold text-ink-900">Awaiting your decision ({pending.length})</p>
         </div>
         <div className="overflow-x-auto">
@@ -87,8 +87,8 @@ export default function WardenDashboard() {
         </div>
       </div>
 
-      <div className="mt-8 rounded-2xl border border-gray-200 bg-white">
-        <div className="border-b border-gray-100 px-6 py-4">
+      <div className="mt-8 rounded-2xl border border-brand-100 bg-white">
+        <div className="border-b border-brand-50 px-6 py-4">
           <p className="font-display font-semibold text-ink-900">Recently decided</p>
         </div>
         <div className="divide-y divide-gray-50">
