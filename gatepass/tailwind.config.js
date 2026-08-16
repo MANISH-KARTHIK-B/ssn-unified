@@ -5,12 +5,17 @@ export default {
     extend: {
       colors: {
         brand: {
-          50: "#EDFBF5",
-          100: "#D3F5E6",
-          500: "#1F9D6E",
-          600: "#1A8560",
-          700: "#166D4E",
-          900: "#0C3B2A"
+          50: "#EEF3FC",
+          100: "#DCE6F8",
+          200: "#B7CBEF",
+          500: "#2A56A6",
+          600: "#1F4483",
+          700: "#17356A",
+          900: "#0B1E42"
+        },
+        gold: {
+          400: "#E4BA55",
+          500: "#D4A72C"
         },
         ink: {
           900: "#101827",
@@ -20,7 +25,10 @@ export default {
       },
       fontFamily: {
         display: ["'Sora'", "system-ui", "sans-serif"],
-        sans: ["'Sora'", "system-ui", "sans-serif"]
+        sans: ["'Inter'", "system-ui", "sans-serif"]
+      },
+      backgroundImage: {
+        "gate-grid": "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.08) 1px, transparent 0)"
       }
     }
   },
