@@ -8,7 +8,7 @@ const STATUS_STYLE = {
   Resolved: "bg-green-100 text-green-700"
 };
 
-export default function TicketDetail({ ticket, onBack, onUpdate }) {
+export default function TicketDetail({ ticket, onBack, onUpdate, replyUrl, isFaculty }) {
   const [reply, setReply] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -17,12 +17,17 @@ export default function TicketDetail({ ticket, onBack, onUpdate }) {
     if (!reply.trim()) return;
     setBusy(true);
     try {
-      const res = await api.post(`/api/helpdesk/tickets/${ticket.id}/reply`, { text: reply });
+      const res = await api.post(replyUrl, { text: reply });
       onUpdate(res.data);
       setReply("");
     } finally {
       setBusy(false);
     }
+  }
+
+  async function changeStatus(status) {
+    const res = await api.post(`/api/faculty/helpdesk/tickets/${ticket.id}/status`, { status });
+    onUpdate(res.data);
   }
 
   return (
@@ -34,9 +39,22 @@ export default function TicketDetail({ ticket, onBack, onUpdate }) {
       <div className="rounded-2xl border border-gray-200 bg-white p-5">
         <div className="mb-2 flex items-center justify-between">
           <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-char-500">{ticket.category}</span>
-          <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_STYLE[ticket.status]}`}>{ticket.status}</span>
+          {isFaculty ? (
+            <select
+              value={ticket.status}
+              onChange={(e) => changeStatus(e.target.value)}
+              className={`rounded-full border-0 px-2.5 py-0.5 text-xs font-semibold ${STATUS_STYLE[ticket.status]}`}
+            >
+              <option>Open</option>
+              <option>In Progress</option>
+              <option>Resolved</option>
+            </select>
+          ) : (
+            <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_STYLE[ticket.status]}`}>{ticket.status}</span>
+          )}
         </div>
         <p className="font-display text-lg font-bold text-char-900">{ticket.subject}</p>
+        {isFaculty && <p className="mt-1 text-xs text-char-500">From {ticket.studentId}</p>}
         <p className="mt-1 text-xs text-char-500">Raised on {ticket.createdAt}</p>
         <p className="mt-3 text-sm leading-relaxed text-char-700">{ticket.description}</p>
       </div>
@@ -44,7 +62,7 @@ export default function TicketDetail({ ticket, onBack, onUpdate }) {
       <div className="mt-6 space-y-3">
         {ticket.replies.map((r, i) => (
           <div key={i} className={`max-w-[80%] rounded-2xl p-4 text-sm ${r.from === "support" ? "bg-white border border-gray-200" : "ml-auto bg-ember-500 text-white"}`}>
-            <p className="mb-1 text-[11px] font-medium uppercase tracking-wide opacity-70">{r.from === "support" ? "Support team" : "You"} · {r.at}</p>
+            <p className="mb-1 text-[11px] font-medium uppercase tracking-wide opacity-70">{r.from === "support" ? "Support team" : "Student"} · {r.at}</p>
             <p>{r.text}</p>
           </div>
         ))}
