@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { CreditCard, Network, IndianRupee, Landmark, Mail } from "lucide-react";
 
 const TILES = [
-  { to: "/profile", label: "Profile", icon: IdCard },
+  { to: "/profile", label: "Profile", icon: CreditCard },
   { to: "/mentorship", label: "Mentorship", icon: Network },
   { to: "/fee-payment", label: "Fee Payment", icon: IndianRupee },
   { to: "/academic", label: "Academic", icon: Landmark },

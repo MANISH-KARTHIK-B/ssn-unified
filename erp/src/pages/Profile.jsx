@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { IdCard, BedDouble, UserCircle2 } from "lucide-react";
+import { CreditCard, BedDouble, UserCircle2 } from "lucide-react";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import SectionHeader from "../components/SectionHeader";
@@ -23,7 +23,7 @@ export default function Profile() {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
-      <SectionHeader icon={IdCard} title="Profile" subtitle="Your personal and academic identity" />
+      <SectionHeader icon={CreditCard} title="Profile" subtitle="Your personal and academic identity" />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[220px_1fr]">
         <div className="rounded-2xl border border-wine-100 bg-white p-6 text-center">
