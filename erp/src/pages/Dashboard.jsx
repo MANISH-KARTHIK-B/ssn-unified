@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { IdCard, Network, IndianRupee, Landmark, Mail } from "lucide-react";
+import { CreditCard, Network, IndianRupee, Landmark, Mail } from "lucide-react";
 
 const TILES = [
   { to: "/profile", label: "Profile", icon: IdCard },
