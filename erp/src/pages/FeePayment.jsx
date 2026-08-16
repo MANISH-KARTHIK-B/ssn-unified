@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { IndianRupee } from "lucide-react";
 import { api } from "../lib/api";
+import SectionHeader from "../components/SectionHeader";
 
-export default function Fees() {
+export default function FeePayment() {
   const [data, setData] = useState(null);
   const [paying, setPaying] = useState(null);
 
@@ -17,8 +19,9 @@ export default function Fees() {
   }
 
   return (
-    <div className="px-8 py-8">
-      <h1 className="mb-6 font-display text-2xl font-bold text-stone-900">Fee Structure & Payment Status</h1>
+    <main className="mx-auto max-w-3xl px-6 py-10">
+      <SectionHeader icon={IndianRupee} title="Fee Payment" subtitle="Semester fee structure and payment status" />
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {data?.semesters.map((s) => (
           <div key={s.semester} className="rounded-2xl border border-wine-100 bg-white p-5">
@@ -45,6 +48,6 @@ export default function Fees() {
         ))}
       </div>
       {!data && <p className="text-sm text-stone-500">Loading…</p>}
-    </div>
+    </main>
   );
 }
