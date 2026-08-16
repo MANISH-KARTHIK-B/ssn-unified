@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Office of the COE - SSN College of Engineering (Mock)</title>
+<style>
+  :root{
+    --navy:#154360;
+    --navy-dark:#0d2e42;
+    --gold:#1e6fa8;
+    --gold-contrast:#fff;
+    --paper:#eef3f7;
+    --line:#c9d6e0;
+    --text:#1f2937;
+    --muted:#5b6472;
+    --green:#1e7d32;
+    --red:#c0392b;
+    --amber:#b8860b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI',Arial,Helvetica,sans-serif;
+    background:var(--paper);
+    color:var(--text);
+    line-height:1.5;
+  }
+  a{color:var(--navy);}
+  .hidden{display:none !important;}
+  button{font-family:inherit;}
+
+  .demo-banner{
+    background:#3a1f00;
+    color:#ffd98c;
+    text-align:center;
+    font-size:.76rem;
+    padding:6px 10px;
+    letter-spacing:.2px;
+  }
+
+  /* ============ SHARED IDENTITY / NAV (public pages) ============ */
+  .identity{
+    background:var(--navy-dark);
+    color:#e7edf5;
+    text-align:center;
+    padding:20px 16px 16px;
+  }
+  .identity .badge{
+    width:56px;height:56px;border-radius:50%;
+    overflow:hidden;
+    background:var(--gold);color:var(--gold-contrast);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:1rem;margin:0 auto 8px;
+  }
+  .identity .badge img{width:100%;height:100%;object-fit:contain;background:#fff;}
+  .identity h1{margin:0;font-size:1rem;font-weight:600;}
+  .identity h2{margin:2px 0 0;font-size:.78rem;font-weight:400;color:#aebcd0;}
+  .identity h3{margin:8px 0 0;font-size:1.2rem;font-weight:700;color:var(--gold);}
+
+  .pubnav{
+    background:var(--navy);
+    border-top:1px solid #163a63;
+    position:relative;
+  }
+  .hamburger-btn{
+    display:none;
+    background:none;border:none;color:#e7edf5;font-size:1.3rem;
+    padding:10px 16px;cursor:pointer;line-height:1;
+  }
+  .pubnav ul{
+    list-style:none;display:flex;flex-wrap:wrap;justify-content:center;
+    margin:0;padding:0;
+  }
+  .pubnav li button{
+    display:block;background:none;border:none;border-right:1px solid #163a63;
+    padding:11px 16px;color:#e7edf5;text-decoration:none;
+    font-size:.8rem;font-weight:600;letter-spacing:.3px;cursor:pointer;
+  }
+  .pubnav li button:hover, .pubnav li button.active{background:var(--gold);color:var(--gold-contrast);}
+  @media(max-width:700px){
+    .hamburger-btn{display:block;}
+    .pubnav ul{
+      display:none;flex-direction:column;
+      position:absolute;top:100%;left:0;right:0;
+      background:var(--navy-dark);
+      border-top:1px solid #163a63;
+      z-index:40;
+    }
+    .pubnav ul.open{display:flex;}
+    .pubnav li{width:100%;}
+    .pubnav li button{width:100%;text-align:left;border-right:none;border-bottom:1px solid #163a63;padding:12px 20px;}
+  }
+  .date-strip{
+    background:#eef1f5;text-align:center;font-size:.78rem;color:var(--muted);
+    padding:6px;border-bottom:1px solid var(--line);
+  }
+  .ticker-wrap{
+    display:flex;align-items:center;gap:12px;
+    background:#fff3e0;border-bottom:1px solid #f0d9b0;
+    padding:7px 16px;
+  }
+  .ticker-label{
+    flex-shrink:0;background:var(--red);color:#fff;font-size:.7rem;font-weight:800;
+    padding:3px 9px;border-radius:3px;letter-spacing:.3px;
+  }
+  .ticker-viewport{flex:1;overflow:hidden;height:1.3rem;position:relative;}
+  .ticker-text{
+    position:absolute;left:0;top:0;white-space:nowrap;font-size:.82rem;color:#7a4a00;font-weight:600;
+    transform:translateY(0);opacity:1;
+    transition:transform .5s ease, opacity .5s ease;
+  }
+  .ticker-text.out{transform:translateY(-100%);opacity:0;}
+
+  .page{display:none;}
+  .page.active{display:block;}
+
+  main.pubmain{max-width:960px;margin:0 auto;padding:26px 20px 60px;}
+
+  /* ============ ANNOUNCEMENTS / RESOURCES (home) ============ */
+  .announcements{
+    background:#fff;border:1px solid var(--line);border-top:4px solid var(--gold);
+    border-radius:4px;padding:22px 24px;margin-bottom:28px;
+  }
+  .announcements h2, .resources h2{
+    margin:0 0 16px;font-size:1.1rem;color:var(--navy);
+    border-bottom:2px solid var(--navy);padding-bottom:8px;
+  }
+  .announcement{padding:13px 0;border-bottom:1px dashed var(--line);font-size:.9rem;}
+  .announcement:last-child{border-bottom:none;}
+  .announcement .new-tag{
+    display:inline-block;background:var(--red);color:#fff;font-size:.64rem;font-weight:700;
+    padding:2px 6px;border-radius:3px;margin-left:6px;vertical-align:middle;
+  }
+  .announcement ul{margin:8px 0 0 18px;padding:0;font-size:.86rem;color:var(--muted);}
+  .resource-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;}
+  .resource-grid a{
+    display:block;background:#fff;border:1px solid var(--line);border-left:4px solid var(--navy);
+    border-radius:4px;padding:12px 14px;text-decoration:none;color:var(--text);
+    font-size:.87rem;font-weight:600;
+  }
+  .resource-grid a:hover{background:#eef4ff;border-left-color:var(--gold);}
+
+  /* ============ PEOPLE ============ */
+  .people-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;}
+  .people-card{
+    background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden;
+    text-align:center;padding-bottom:14px;
+  }
+  .people-card .photo{
+    width:100%;height:170px;object-fit:cover;background:#dbe6f5;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;color:var(--navy);font-size:1.6rem;
+  }
+  .people-card h4{margin:12px 0 2px;font-size:.87rem;color:var(--navy);}
+  .people-card p{margin:0;font-size:.76rem;color:var(--muted);padding:0 10px;}
+
+  /* ============ CONTACT ============ */
+  .contact-panel{
+    background:#fff;border:1px solid var(--line);border-top:4px solid var(--gold);
+    border-radius:4px;padding:24px;
+  }
+  .contact-panel h2{margin:0 0 16px;color:var(--navy);font-size:1.1rem;border-bottom:2px solid var(--navy);padding-bottom:8px;}
+  .contact-row{display:flex;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:.88rem;}
+  .contact-row .ic{width:22px;}
+  .contact-row:last-child{border-bottom:none;}
+
+  /* ============ LOGIN CARDS ============ */
+  .login-center{display:flex;align-items:center;justify-content:center;padding:34px 16px;}
+  .login-card{
+    background:#fff;border:1px solid var(--line);border-top:4px solid var(--gold);border-radius:6px;
+    padding:30px 28px;width:100%;max-width:380px;box-shadow:0 6px 22px rgba(11,45,85,.08);
+  }
+  .login-card h4{margin:0 0 4px;color:var(--navy);font-size:1rem;}
+  .login-card p.sub{margin:0 0 20px;color:var(--muted);font-size:.82rem;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:5px;}
+  .field input{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:4px;font-size:.9rem;}
+  .field input:focus{outline:2px solid var(--navy);outline-offset:1px;}
+  .captcha-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+  .captcha-box{
+    background:#eef1f5;border:1px solid var(--line);border-radius:4px;
+    padding:9px 14px;font-weight:800;letter-spacing:2px;color:var(--navy);
+    font-family:'Courier New',monospace;font-size:1rem;user-select:none;
+  }
+  .captcha-reload{background:none;border:none;cursor:pointer;font-size:1.1rem;}
+  .btn{
+    display:inline-block;background:var(--navy);color:#fff;border:none;padding:10px 18px;
+    border-radius:4px;font-size:.85rem;font-weight:600;cursor:pointer;letter-spacing:.2px;
+  }
+  .btn:hover{background:var(--navy-dark);}
+  .btn.gold{background:var(--red);color:#fff;}
+  .btn.gold:hover{background:#a5301f;}
+  .btn.outline{background:#fff;color:var(--navy);border:1px solid var(--navy);}
+  .btn.outline:hover{background:#eef4ff;}
+  .btn.block{width:100%;}
+  .btn.small{padding:6px 12px;font-size:.78rem;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .login-foot{margin-top:14px;text-align:center;font-size:.8rem;}
+  .login-error{background:#fdecea;color:var(--red);border:1px solid #f5c6c3;padding:8px 10px;border-radius:4px;font-size:.78rem;margin-bottom:14px;}
+  .login-ok{background:#e6f4ea;color:var(--green);border:1px solid #bfe3c9;padding:8px 10px;border-radius:4px;font-size:.78rem;margin-bottom:14px;}
+  .note{font-size:.78rem;color:var(--muted);margin-top:10px;}
+
+  /* ============ APP SHELL (dashboards) ============ */
+  .app{display:none;min-height:100vh;grid-template-columns:230px 1fr;}
+  .app.active{display:grid;}
+  .topbar{
+    grid-column:1/-1;background:var(--navy-dark);color:#fff;display:flex;
+    align-items:center;justify-content:space-between;padding:10px 20px;
+  }
+  .topbar .brand{display:flex;align-items:center;gap:10px;font-size:.85rem;font-weight:600;}
+  .topbar .brand .dot{
+    width:34px;height:34px;border-radius:50%;background:var(--gold);color:var(--gold-contrast);
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;overflow:hidden;
+  }
+  .topbar .brand .dot img{width:100%;height:100%;object-fit:contain;background:#fff;}
+  .topbar .user{display:flex;align-items:center;gap:10px;font-size:.8rem;}
+  .topbar .user img, .topbar .user .avatar-fallback{
+    width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);
+    background:#3c5a82;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;
+  }
+  .sidebar{background:#fff;border-right:1px solid var(--line);padding:14px 0;}
+  .sidebar .navlabel{padding:10px 18px 6px;font-size:.66rem;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700;}
+  .sidebar button.navitem{
+    display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;
+    border-left:3px solid transparent;padding:10px 18px;font-size:.83rem;color:var(--text);cursor:pointer;
+  }
+  .sidebar button.navitem:hover{background:#eef4ff;}
+  .sidebar button.navitem.active{background:#eef4ff;border-left-color:var(--gold);color:var(--navy);font-weight:700;}
+  .sidebar button.navitem .ic{width:18px;text-align:center;}
+  .sidebar .logout-item{color:var(--red) !important;}
+  main.content{padding:24px 26px 60px;max-width:980px;}
+  .panel{background:#fff;border:1px solid var(--line);border-top:4px solid var(--navy);border-radius:5px;padding:22px 24px;margin-bottom:20px;}
+  .panel h2{margin:0 0 4px;font-size:1.1rem;color:var(--navy);}
+  .panel p.desc{margin:0 0 18px;font-size:.82rem;color:var(--muted);}
+  table{width:100%;border-collapse:collapse;font-size:.83rem;}
+  th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;}
+  th{background:#f0f3f7;color:var(--navy);font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:.3px;}
+  tr:hover td{background:#fafbfd;}
+  .pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:.72rem;font-weight:700;}
+  .pill.green{background:#e6f4ea;color:var(--green);}
+  .pill.amber{background:#fff4e0;color:var(--amber);}
+  .pill.red{background:#fdecea;color:var(--red);}
+  .pill.gray{background:#eceff2;color:var(--muted);}
+  .profile-grid{display:grid;grid-template-columns:140px 1fr;gap:20px;align-items:start;}
+  .profile-photo{
+    width:130px;height:150px;border:1px solid var(--line);border-radius:4px;object-fit:cover;background:#dbe6f5;
+    display:flex;align-items:center;justify-content:center;font-size:2.1rem;font-weight:800;color:var(--navy);
+  }
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;}
+  .info-item{font-size:.85rem;padding:7px 0;border-bottom:1px dashed var(--line);}
+  .info-item .lbl{display:block;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px;}
+  .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:18px;}
+  .stat-box{background:#f6f8fb;border:1px solid var(--line);border-radius:5px;padding:12px 14px;text-align:center;}
+  .stat-box .num{font-size:1.5rem;font-weight:800;color:var(--navy);}
+  .stat-box .lbl{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;}
+  .upload-box{border:2px dashed var(--line);border-radius:6px;padding:26px;text-align:center;color:var(--muted);font-size:.85rem;}
+  .credit-line{font-weight:700;color:var(--navy);}
+  .quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;}
+  .quick-card{background:#f6f8fb;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:5px;padding:14px;font-size:.85rem;}
+  .quick-card b{color:var(--navy);display:block;margin-bottom:4px;}
+
+  .toast{
+    position:fixed;bottom:20px;right:20px;background:var(--navy-dark);color:#fff;padding:11px 18px;
+    border-radius:5px;font-size:.82rem;box-shadow:0 4px 16px rgba(0,0,0,.2);opacity:0;transform:translateY(10px);
+    transition:all .25s;z-index:60;
+  }
+  .toast.show{opacity:1;transform:translateY(0);}
+
+  footer.pubfoot{text-align:center;padding:18px;font-size:.78rem;color:var(--muted);background:#eef1f5;border-top:1px solid var(--line);}
+
+  /* ============ TRANSITION OVERLAY (spinning logo) ============ */
+  #transitionOverlay{
+    position:fixed;inset:0;background:var(--navy-dark);
+    display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;
+    z-index:9999;
+  }
+  #transitionOverlay.show{display:flex;}
+  .spin-ring{
+    width:84px;height:84px;border-radius:50%;
+    border:4px solid rgba(255,255,255,.15);
+    border-top-color:var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    animation:spin 0.9s linear infinite;
+  }
+  .spin-ring .spin-logo-wrap{
+    width:62px;height:62px;border-radius:50%;background:#fff;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .spin-ring img{width:100%;height:100%;object-fit:contain;}
+  .spin-ring .fallback-badge{font-weight:800;color:var(--navy);font-size:.85rem;}
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  #transitionOverlay .spin-text{color:#e7edf5;font-size:.82rem;letter-spacing:.4px;}
+
+  @media(max-width:760px){
+    .app.active{grid-template-columns:1fr;}
+    .sidebar{display:flex;overflow-x:auto;padding:8px 6px;border-right:none;border-bottom:1px solid var(--line);}
+    .sidebar .navlabel{display:none;}
+    .sidebar button.navitem{white-space:nowrap;border-left:none;border-bottom:3px solid transparent;}
+    .sidebar button.navitem.active{border-bottom-color:var(--gold);}
+    .profile-grid{grid-template-columns:1fr;}
+    .info-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-banner">MOCK PORTAL &mdash; not affiliated with or connected to the real SSN COE system. All student/marks data is randomly generated. The People/Contact info reflects the real public page but photos may fail to load if hotlinking is blocked.</div>
+
+<!-- ===================== TRANSITION OVERLAY ===================== -->
+<div id="transitionOverlay">
+  <div class="spin-ring">
+    <div class="spin-logo-wrap">
+      <img src="https://coe.ssn.edu.in/assets/images/logo.png" alt="" onerror="this.parentElement.innerHTML='<span class=&quot;fallback-badge&quot;>SSN</span>'">
+    </div>
+  </div>
+  <div class="spin-text">Loading&hellip;</div>
+</div>
+
+<!-- ===================== PUBLIC SITE SHELL ===================== -->
+<div id="publicShell">
+  <div class="identity">
+    <div class="badge"><img src="https://coe.ssn.edu.in/assets/images/logo.png" alt="SSN logo" onerror="this.parentElement.textContent='SSN'"></div>
+    <h1>Sri Sivasubramaniya Nadar College of Engineering, Kalavakkam - 603 110</h1>
+    <h2>(An Autonomous Institution, Affiliated to Anna University, Chennai)</h2>
+    <h3>Office of the Controller of Examinations</h3>
+  </div>
+  <nav class="pubnav">
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+    <ul id="pubnavList">
+      <li><button data-page="page-home" class="pubnav-btn">HOME</button></li>
+      <li><button data-page="page-staff-login" class="pubnav-btn">STAFF LOGIN</button></li>
+      <li><button data-page="page-student-login" class="pubnav-btn">STUDENT LOGIN</button></li>
+      <li><button data-page="page-parent-login" class="pubnav-btn">PARENT LOGIN</button></li>
+      <li><button data-page="page-people" class="pubnav-btn">PEOPLE</button></li>
+      <li><button data-page="page-contact" class="pubnav-btn">CONTACT US</button></li>
+    </ul>
+  </nav>
+  <div class="date-strip" id="dateStrip"></div>
+  <div class="ticker-wrap">
+    <span class="ticker-label">&#128276; Latest</span>
+    <div class="ticker-viewport"><div class="ticker-text" id="tickerText"></div></div>
+  </div>
+
+  <!-- ---------- HOME ---------- -->
+  <div class="page active" id="page-home">
+    <main class="pubmain">
+      <section class="announcements">
+        <h2>Announcements</h2>
+        <div class="announcement">
+          April / May 2026 End Semester Revaluation Results (Phase II) for the following semesters will be published on 29-07-2026 at 11:00 AM.
+          <span class="new-tag">NEW</span>
+          <ul>
+            <li>B.E./B.Tech. I, II, III, IV, V, VI Semesters (R-2021) &mdash; VII and VIII Semester Revaluation results already published in Phase I</li>
+            <li>B.E./B.Tech. I, II, III, IV Semester (R-2024)</li>
+            <li>M.Tech. CSE (5YI) I, II, III, IV, V, VI Semesters (R-2023)</li>
+          </ul>
+        </div>
+        <div class="announcement">
+          April / May 2026 End Semester Results (Phase II) &mdash; Downloading of the Photocopy of Answer Scripts is enabled on 14-07-2026 at 1:00 PM and the last date for applying for Revaluation is 16-07-2026 by 03:40 PM.
+        </div>
+        <div class="announcement">
+          April / May 2026 End Semester Results (Phase II) will be published on 08-07-2026 at 01:30 PM for the following semesters.
+          <ul>
+            <li>B.E./B.Tech. I, II, III, IV, V, VI Semesters (R-2021) &mdash; VII and VIII Semester results already published in Phase I</li>
+            <li>B.E./B.Tech. I, II, III, IV Semester (R-2024)</li>
+            <li>M.Tech. CSE (5YI) I, II, III, IV, V, VI Semesters (R-2023)</li>
+          </ul>
+          <p style="margin:10px 0 0;color:var(--muted);font-size:.86rem;">Application for the Photocopy of Answer Scripts will be enabled on 08-07-2026 at 01:30 PM and the last date for applying for photocopy is 12-07-2026 by 03:40 PM.</p>
+        </div>
+        <div class="announcement">
+          April / May 2026 End Semester Results (Phase I) will be published on 18-05-2026 at 1:30 PM for the following semesters.
+          <ul>
+            <li>B.E./B.Tech. I to VIII Semesters (R-2018)</li>
+            <li>B.E./B.Tech. VIII Semester &amp; VII Semester Arrear only (R-2021)</li>
+            <li>M.B.A. IV Semester (R-2021) &amp; I, II, III Semester Arrear only</li>
+            <li>M.B.A. II Semester (R-2025) &amp; I Semester Arrear only</li>
+            <li>M.E./M.Tech. IV Semester (R-2022) &amp; I, II, III Semester Arrear only</li>
+            <li>M.E./M.Tech. II Semester (R-2025) &amp; I Semester Arrear only</li>
+          </ul>
+        </div>
+      </section>
+      <section class="resources">
+        <h2>Resources</h2>
+        <div class="resource-grid">
+          <a href="#">Autonomous Regulations</a>
+          <a href="#">Curriculum and Syllabus</a>
+          <a href="#">TCP Course Details</a>
+          <a href="#">Academic, CAT &amp; End Semester Schedule &mdash; Cycle wise</a>
+          <a href="#">Continuous Assessment Test (CAT) &mdash; QP Pattern</a>
+          <a href="#">End Semester Examinations (ESE) &mdash; QP Pattern</a>
+          <a href="#">Guidelines for Preparation of UG/PG Project Report/Thesis</a>
+          <a href="#">Transcript Application Form</a>
+          <a href="#">Claim form for the Anna University Representative (AUR)</a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ---------- STUDENT LOGIN ---------- -->
+  <div class="page" id="page-student-login">
+    <div class="login-center">
+      <div class="login-card">
+        <h4>Student Academic Details</h4>
+        <p class="sub">Sign in to start your session</p>
+        <div id="studentLoginError" class="login-error hidden"></div>
+        <form id="studentLoginForm">
+          <div class="field">
+            <label for="rollNo">Register Number</label>
+            <input type="text" id="rollNo" placeholder="e.g. 31222241XXXXX" autocomplete="username" required>
+          </div>
+          <div class="field">
+            <label for="pwd">Password</label>
+            <input type="password" id="pwd" placeholder="Enter any password" autocomplete="current-password" required>
+          </div>
+          <button type="submit" class="btn gold block">Sign In</button>
+        </form>
+        <p class="login-foot"><a href="#" id="forgotLinkStudent">I forgot my password</a></p>
+        <p class="note" style="text-align:center;">Demo only &mdash; any register number / password signs you in with fresh random data.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- PARENT LOGIN ---------- -->
+  <div class="page" id="page-parent-login">
+    <div class="login-center">
+      <div class="login-card">
+        <h4>Student Academic Details for Parents</h4>
+        <p class="sub">Sign in to view your ward's academic record</p>
+        <div id="parentLoginError" class="login-error hidden"></div>
+        <form id="parentLoginForm">
+          <div class="field">
+            <label for="pRollNo">Register Number</label>
+            <input type="text" id="pRollNo" placeholder="e.g. 31222241XXXXX" required>
+          </div>
+          <div class="field">
+            <label for="pDob">Date of Birth</label>
+            <input type="date" id="pDob" required>
+          </div>
+          <div class="captcha-row">
+            <div class="captcha-box" id="parentCaptchaText">4 + 7</div>
+            <button type="button" class="captcha-reload" id="parentCaptchaReload" title="Reload captcha">&#8635;</button>
+            <input type="text" id="parentCaptchaInput" placeholder="Answer" style="width:70px;padding:8px;border:1px solid var(--line);border-radius:4px;">
+          </div>
+          <button type="submit" class="btn gold block">Sign In</button>
+        </form>
+        <p class="note" style="text-align:center;">Demo only &mdash; no real password check. Solve the sum to sign in.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- STAFF LOGIN ---------- -->
+  <div class="page" id="page-staff-login">
+    <div class="login-center">
+      <div class="login-card">
+        <h4>Students Marks Entry Portal</h4>
+        <p class="sub">Sign in to start your session</p>
+        <div id="staffLoginError" class="login-error hidden"></div>
+
+        <div id="staffStepCreds">
+          <form id="staffCredsForm">
+            <div class="field">
+              <label for="facId">Faculty ID</label>
+              <input type="text" id="facId" placeholder="e.g. FAC0231" required>
+            </div>
+            <div class="field">
+              <label for="facPwd">Password</label>
+              <input type="password" id="facPwd" placeholder="Enter any password" required>
+            </div>
+            <button type="submit" class="btn gold block">Send OTP</button>
+          </form>
+        </div>
+
+        <div id="staffStepOtp" class="hidden">
+          <div class="login-ok" id="otpNotice"></div>
+          <div class="field">
+            <label for="facOtp">Enter OTP</label>
+            <input type="text" id="facOtp" placeholder="6-digit code" maxlength="6">
+          </div>
+          <button class="btn gold block" id="staffSignInBtn">Sign In</button>
+          <p class="login-foot"><a href="#" id="resendOtpLink">Resend OTP</a></p>
+        </div>
+
+        <p class="login-foot"><a href="#" id="forgotLinkStaff">I forgot my password</a></p>
+        <p class="note" style="text-align:center;">Demo only &mdash; the OTP is shown on-screen below since there's no real SMS gateway here.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- PEOPLE ---------- -->
+  <div class="page" id="page-people">
+    <main class="pubmain">
+      <section class="resources">
+        <h2>People</h2>
+        <div class="people-grid" id="peopleGrid"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ---------- CONTACT ---------- -->
+  <div class="page" id="page-contact">
+    <main class="pubmain">
+      <div class="contact-panel">
+        <h2>Office of the Controller of Examinations</h2>
+        <p style="margin-top:-8px;color:var(--muted);font-size:.85rem;">Sri Sivasubramaniya Nadar College of Engineering</p>
+        <div class="contact-row"><span class="ic">&#128205;</span> Rajiv Gandhi Salai (OMR), Kalavakkam &ndash; 603 110</div>
+        <div class="contact-row"><span class="ic">&#128222;</span> +91 44 2746 9700 (Extension: 415 / 324)</div>
+        <div class="contact-row"><span class="ic">&#9993;</span> Email is spam-protected on the official site &mdash; please use the phone number above or the official site to look it up.</div>
+        <div class="contact-row"><span class="ic">&#128337;</span> Working hours: 8:00 AM &ndash; 3:30 PM</div>
+      </div>
+    </main>
+  </div>
+
+  <footer class="pubfoot">2026 &copy; Copyright: <a href="https://www.ssn.edu.in" target="_blank" rel="noopener">SSN</a>. All rights reserved. (Mock recreation for demo purposes.)</footer>
+</div>
+
+<!-- ===================== STUDENT DASHBOARD ===================== -->
+<div class="app" id="page-student-app">
+  <div class="topbar">
+    <div class="brand"><span class="dot"><img src="https://coe.ssn.edu.in/assets/images/logo.png" onerror="this.parentElement.textContent='SSN'"></span> Office of the COE &mdash; Student Portal</div>
+    <div class="user"><span id="topUserName">&mdash;</span><span id="topAvatar" class="avatar-fallback">--</span></div>
+  </div>
+  <div class="sidebar">
+    <div class="navlabel">Menu</div>
+    <button class="navitem" data-view="profile"><span class="ic">&#128100;</span> Profile</button>
+    <button class="navitem" data-view="uploadPhoto"><span class="ic">&#128248;</span> Upload Photo</button>
+    <button class="navitem" data-view="verifyGradesheet"><span class="ic">&#9989;</span> Verify Gradesheet</button>
+    <button class="navitem" data-view="registeredSubjects"><span class="ic">&#128218;</span> Registered Subjects</button>
+    <button class="navitem" data-view="catMarks"><span class="ic">&#128221;</span> CAT Marks</button>
+    <button class="navitem" data-view="finalInternal"><span class="ic">&#128202;</span> Final Internal Marks</button>
+    <button class="navitem" data-view="examSeatings"><span class="ic">&#128197;</span> Exam Timetable &amp; Seating</button>
+    <button class="navitem" data-view="endsemResults"><span class="ic">&#127942;</span> Exam Results</button>
+    <button class="navitem" data-view="academicReport"><span class="ic">&#128200;</span> Academic Report</button>
+    <button class="navitem" data-view="photocopy"><span class="ic">&#128203;</span> Photocopy &amp; Revaluation</button>
+    <button class="navitem" data-view="changePassword"><span class="ic">&#128274;</span> Change Password</button>
+    <div class="navlabel">&nbsp;</div>
+    <button class="navitem logout-item" id="logoutBtnStudent"><span class="ic">&#9099;</span> Logout</button>
+  </div>
+  <main class="content" id="studentContent"></main>
+</div>
+
+<!-- ===================== PARENT DASHBOARD ===================== -->
+<div class="app" id="page-parent-app">
+  <div class="topbar">
+    <div class="brand"><span class="dot"><img src="https://coe.ssn.edu.in/assets/images/logo.png" onerror="this.parentElement.textContent='SSN'"></span> Office of the COE &mdash; Parent Portal</div>
+    <div class="user"><span id="topParentName">&mdash;</span><span class="avatar-fallback">&#128101;</span></div>
+  </div>
+  <div class="sidebar">
+    <div class="navlabel">Menu</div>
+    <button class="navitem" data-pview="profile"><span class="ic">&#128100;</span> Ward's Profile</button>
+    <button class="navitem" data-pview="registeredSubjects"><span class="ic">&#128218;</span> Registered Subjects</button>
+    <button class="navitem" data-pview="catMarks"><span class="ic">&#128221;</span> CAT Marks</button>
+    <button class="navitem" data-pview="finalInternal"><span class="ic">&#128202;</span> Final Internal Marks</button>
+    <button class="navitem" data-pview="endsemResults"><span class="ic">&#127942;</span> Exam Results</button>
+    <button class="navitem" data-pview="academicReport"><span class="ic">&#128200;</span> Academic Report</button>
+    <div class="navlabel">&nbsp;</div>
+    <button class="navitem logout-item" id="logoutBtnParent"><span class="ic">&#9099;</span> Logout</button>
+  </div>
+  <main class="content" id="parentContent"></main>
+</div>
+
+<!-- ===================== STAFF DASHBOARD ===================== -->
+<div class="app" id="page-staff-app">
+  <div class="topbar">
+    <div class="brand"><span class="dot"><img src="https://coe.ssn.edu.in/assets/images/logo.png" onerror="this.parentElement.textContent='SSN'"></span> Students Marks Entry Portal</div>
+    <div class="user"><span id="topStaffName">&mdash;</span><span class="avatar-fallback">&#128100;</span></div>
+  </div>
+  <div class="sidebar">
+    <div class="navlabel">Menu</div>
+    <button class="navitem active" data-sview="home"><span class="ic">&#127968;</span> Dashboard</button>
+    <div class="navlabel">&nbsp;</div>
+    <button class="navitem logout-item" id="logoutBtnStaff"><span class="ic">&#9099;</span> Logout</button>
+  </div>
+  <main class="content" id="staffContent"></main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   PAGE TRANSITION (spinning logo overlay)
+   ============================================================ */
+function goToPage(pageId, opts){
+  opts = opts || {};
+  const overlay = document.getElementById("transitionOverlay");
+  overlay.classList.add("show");
+  setTimeout(()=>{
+    // hide all top-level pages/apps
+    document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+    document.querySelectorAll(".app").forEach(a=>a.classList.remove("active"));
+    document.getElementById("publicShell").style.display = "none";
+
+    if(pageId.startsWith("page-") && ["page-student-app","page-parent-app","page-staff-app"].includes(pageId)){
+      document.getElementById(pageId).classList.add("active");
+    } else {
+      document.getElementById("publicShell").style.display = "block";
+      document.getElementById(pageId).classList.add("active");
+      document.querySelectorAll(".pubnav-btn").forEach(b=>{
+        b.classList.toggle("active", b.dataset.page === pageId);
+      });
+    }
+    if(typeof opts.after === "function") opts.after();
+    overlay.classList.remove("show");
+  }, 700);
+}
+
+document.querySelectorAll(".pubnav-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.getElementById("pubnavList").classList.remove("open");
+    document.getElementById("hamburgerBtn").setAttribute("aria-expanded","false");
+    goToPage(btn.dataset.page);
+  });
+});
+document.getElementById("hamburgerBtn").addEventListener("click", ()=>{
+  const list = document.getElementById("pubnavList");
+  const open = list.classList.toggle("open");
+  document.getElementById("hamburgerBtn").setAttribute("aria-expanded", open ? "true" : "false");
+});
+
+document.getElementById("dateStrip").textContent = new Date().toLocaleDateString('en-US', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+/* ============================================================
+   MOVING ANNOUNCEMENTS TICKER
+   ============================================================ */
+const TICKER_ITEMS = [
+  "April / May 2026 End Semester Revaluation Results (Phase II) published 29-07-2026 at 11:00 AM.",
+  "Photocopy of Answer Scripts (Phase II) download enabled 14-07-2026; last date for Revaluation 16-07-2026, 03:40 PM.",
+  "April / May 2026 End Semester Results (Phase II) published 08-07-2026 at 01:30 PM.",
+  "Photocopy applications (Phase II) open 08-07-2026; last date 12-07-2026, 03:40 PM.",
+  "April / May 2026 End Semester Results (Phase I) published 18-05-2026 at 1:30 PM.",
+  "Photocopy applications (Phase I) open 18-05-2026; last date 21-05-2026, 03:40 PM."
+];
+let tickerIdx = 0;
+const tickerEl = document.getElementById("tickerText");
+function showTickerItem(){
+  tickerEl.textContent = TICKER_ITEMS[tickerIdx];
+}
+showTickerItem();
+setInterval(()=>{
+  tickerEl.classList.add("out");
+  setTimeout(()=>{
+    tickerIdx = (tickerIdx + 1) % TICKER_ITEMS.length;
+    showTickerItem();
+    tickerEl.classList.remove("out");
+  }, 500);
+}, 4000);
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(()=> t.classList.remove("show"), 2400);
+}
+
+/* ============================================================
+   MOCK DATA GENERATION (shared by student + parent views)
+   ============================================================ */
+const FIRST_NAMES = ["Aarav","Vihaan","Aditya","Sai","Karthik","Arjun","Rohan","Nikhil","Pranav","Vishnu",
+  "Ananya","Sanjana","Meera","Divya","Priya","Lakshmi","Swathi","Kavya","Nithya","Deepika"];
+const LAST_NAMES = ["Kumar","Raj","Sundaram","Krishnan","Iyer","Narayanan","Subramanian","Balaji","Prasad","Venkat"];
+const DEPARTMENTS = [
+  {code:"IT", name:"Information Technology"},
+  {code:"CSE", name:"Computer Science and Engineering"},
+  {code:"ECE", name:"Electronics and Communication Engineering"},
+  {code:"MBA", name:"Master of Business Administration"},
+  {code:"MECH", name:"Mechanical Engineering"}
+];
+const BLOOD_GROUPS = ["A+","A-","B+","B-","AB+","AB-","O+","O-"];
+const SUBJECT_POOL = [
+  {code:"UIT2301", name:"Database Management Systems", credits:4},
+  {code:"UIT2302", name:"Operating Systems", credits:4},
+  {code:"UIT2303", name:"Computer Networks", credits:3},
+  {code:"UIT2304", name:"Software Engineering", credits:3},
+  {code:"UIT2305", name:"Web Technology", credits:3},
+  {code:"UIT2306", name:"Object Oriented Analysis and Design", credits:4},
+  {code:"UIT2307", name:"Theory of Computation", credits:3},
+  {code:"UIT2308", name:"Data Structures Lab", credits:2},
+  {code:"UIT2309", name:"Artificial Intelligence", credits:3},
+  {code:"UIT2310", name:"Machine Learning Fundamentals", credits:4},
+  {code:"UMA2301", name:"Discrete Mathematics", credits:4},
+  {code:"UEN2301", name:"Professional Ethics", credits:2}
+];
+const GRADE_TABLE = [
+  {g:"O", min:91, pt:10}, {g:"A+", min:81, pt:9}, {g:"A", min:71, pt:8},
+  {g:"B+", min:61, pt:7}, {g:"B", min:55, pt:6}, {g:"C", min:50, pt:5}, {g:"U", min:0, pt:0}
+];
+const HALLS = ["Exam Hall A101","Exam Hall A102","Exam Hall B201","Seminar Hall","Main Auditorium","Exam Hall C310"];
+
+function rnd(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function pick(arr){ return arr[rnd(0,arr.length-1)]; }
+function pad(n,len){ return String(n).padStart(len,"0"); }
+function gradeFor(pct){ for(const row of GRADE_TABLE){ if(pct>=row.min) return row; } return GRADE_TABLE[GRADE_TABLE.length-1]; }
+function initials(name){ return name.split(" ").map(p=>p[0]).join("").toUpperCase().slice(0,2); }
+
+let student = {}, subjects = [], catMarks = [], finalMarks = [], seatings = [], results = [],
+    semesterHistory = [], photocopyRows = [], gradesheetRows = [], photoDataUrl = null;
+
+function generateStudent(rollNoOverride){
+  const dept = pick(DEPARTMENTS);
+  const first = pick(FIRST_NAMES);
+  const last = pick(LAST_NAMES);
+  const name = first + " " + last;
+  const batchStartYear = 2022;
+  const rollNo = (rollNoOverride && rollNoOverride.trim()) ? rollNoOverride.trim() : ("312222" + pad(rnd(41000,41999),5));
+  student = {
+    name: name.toUpperCase(), rollNo: rollNo.toUpperCase(), department: dept.name, deptCode: dept.code,
+    batch: batchStartYear + " - " + (batchStartYear+4), currentSemester: rnd(3,7),
+    dob: pad(rnd(1,28),2) + "-" + pad(rnd(1,12),2) + "-" + (2004 + rnd(0,2)),
+    bloodGroup: pick(BLOOD_GROUPS), email: (first + "." + last + rnd(100,999) + "@ssn.edu.in").toLowerCase(),
+    phone: "9" + rnd(100000000,999999999),
+    address: rnd(1,99) + ", " + pick(["Anna Nagar","T. Nagar","Velachery","Tambaram","Adyar","Porur","Kelambakkam"]) + ", Chennai - " + (600000+rnd(1,120)),
+    fatherName: pick(FIRST_NAMES) + " " + last, motherName: pick(FIRST_NAMES) + " " + last,
+    quota: pick(["Government Quota","Management Quota"]), aadharLast4: pad(rnd(0,9999),4)
+  };
+}
+function generateSubjects(){ subjects = [...SUBJECT_POOL].sort(()=>Math.random()-0.5).slice(0,7).map(s=>({...s, status:"Registered"})); }
+function generateCatMarks(){ catMarks = subjects.map(s=>({code:s.code,name:s.name,cat1:rnd(20,50),cat2:rnd(18,50),cat3:rnd(15,50)})); }
+function generateFinalMarks(){
+  finalMarks = catMarks.map(c=>{
+    const avgCat = Math.round(((c.cat1+c.cat2+c.cat3)/3)*(20/50));
+    const assignment = rnd(3,5), attendance = rnd(2,5);
+    return {code:c.code,name:c.name,catComponent:avgCat,assignment,attendance,total:Math.min(30,avgCat+assignment+attendance)};
+  });
+}
+function generateSeatings(){
+  const startDate = new Date(2026,10,25);
+  seatings = subjects.map((s,i)=>{
+    const d = new Date(startDate); d.setDate(d.getDate()+i*2);
+    return {code:s.code,name:s.name,date:pad(d.getDate(),2)+"-"+pad(d.getMonth()+1,2)+"-"+d.getFullYear(),
+      session:pick(["FN (10:00 AM - 01:00 PM)","AN (02:00 PM - 05:00 PM)"]), hall:pick(HALLS), seatNo:pick(["A","B","C","D"])+rnd(1,60)};
+  });
+}
+function generateResults(){
+  let totalCredits=0, totalPoints=0;
+  results = subjects.map(s=>{
+    const pct = rnd(45,98); const grade = gradeFor(pct);
+    totalCredits += s.credits; totalPoints += s.credits*grade.pt;
+    return {code:s.code,name:s.name,credits:s.credits,grade:grade.g,pt:grade.pt,result:grade.g==="U"?"RA":"PASS"};
+  });
+  const sgpa = (totalPoints/totalCredits).toFixed(2);
+  semesterHistory = [];
+  let cumCredits=0, cumPoints=0;
+  for(let sem=1; sem<student.currentSemester; sem++){
+    const credits = rnd(18,24); const gpa = (rnd(65,95)/10).toFixed(2);
+    cumCredits += credits; cumPoints += credits*parseFloat(gpa);
+    semesterHistory.push({sem,credits,sgpa:gpa,cgpa:(cumPoints/cumCredits).toFixed(2)});
+  }
+  cumCredits += totalCredits; cumPoints += totalCredits*parseFloat(sgpa);
+  semesterHistory.push({sem:student.currentSemester,credits:totalCredits,sgpa,cgpa:(cumPoints/cumCredits).toFixed(2)});
+}
+function generatePhotocopy(){
+  photocopyRows = subjects.slice(0,4).map(s=>({code:s.code,name:s.name,
+    photocopyStatus:pick(["Not Applied","Applied","Available for Download"]),
+    revalStatus:pick(["Not Applied","Applied","Under Review","Completed"]), fee:rnd(1,3)*150}));
+}
+function generateGradesheets(){
+  gradesheetRows = [];
+  for(let sem=1; sem<=student.currentSemester; sem++){ gradesheetRows.push({sem, verified: Math.random()>0.35}); }
+}
+let semesterRecords = {}; // keyed by semester number -> {examLabel, subjects, catMarks, results, sgpa}
+function examLabelFor(s){
+  const baseYear = 2022;
+  const year = baseYear + Math.floor((s-1)/2) + (s%2===0 ? 1 : 0);
+  return (s%2===1) ? ("November " + year) : ("April/May " + year);
+}
+function buildSemesterRecord(s){
+  const subs = [...SUBJECT_POOL].sort(()=>Math.random()-0.5).slice(0,7).map(x=>({...x,status:"Registered"}));
+  const cat = subs.map(x=>({code:x.code,name:x.name,cat1:rnd(20,50),cat2:rnd(18,50),cat3:rnd(15,50)}));
+  let totalCredits=0, totalPoints=0;
+  const res = subs.map(x=>{
+    const pct = rnd(45,98); const g = gradeFor(pct);
+    totalCredits += x.credits; totalPoints += x.credits*g.pt;
+    return {code:x.code,name:x.name,credits:x.credits,grade:g.g,pt:g.pt,result:g.g==="U"?"RA":"PASS"};
+  });
+  const sgpa = (totalPoints/totalCredits).toFixed(2);
+  return {examLabel: examLabelFor(s), subjects: subs, catMarks: cat, results: res, sgpa, totalCredits};
+}
+function generateSemesterRecords(){
+  semesterRecords = {};
+  for(let s=1; s<student.currentSemester; s++){ semesterRecords[s] = buildSemesterRecord(s); }
+  // keep the current semester's record consistent with the rest of the app (Registered Subjects etc.)
+  const cur = semesterHistory[semesterHistory.length-1];
+  semesterRecords[student.currentSemester] = {
+    examLabel: examLabelFor(student.currentSemester),
+    subjects, catMarks, results, sgpa: cur.sgpa, totalCredits: cur.credits
+  };
+}
+
+function generateAll(rollNoOverride){
+  generateStudent(rollNoOverride); generateSubjects(); generateCatMarks(); generateFinalMarks();
+  generateSeatings(); generateResults(); generatePhotocopy(); generateGradesheets(); photoDataUrl = null;
+  generateSemesterRecords();
+}
+
+/* ============================================================
+   STUDENT LOGIN / LOGOUT
+   ============================================================ */
+document.getElementById("studentLoginForm").addEventListener("submit", function(e){
+  e.preventDefault();
+  const roll = document.getElementById("rollNo").value.trim();
+  const pwd = document.getElementById("pwd").value.trim();
+  const errBox = document.getElementById("studentLoginError");
+  if(!roll || !pwd){ errBox.textContent = "Please enter both register number and password."; errBox.classList.remove("hidden"); return; }
+  errBox.classList.add("hidden");
+  generateAll(roll);
+  goToPage("page-student-app", { after: ()=>{
+    document.getElementById("topUserName").textContent = student.name + " (" + student.rollNo + ")";
+    document.getElementById("topAvatar").textContent = initials(student.name);
+    setActiveStudentView("profile");
+  }});
+});
+document.getElementById("forgotLinkStudent").addEventListener("click", e=>{ e.preventDefault(); showToast("Demo only \u2014 password reset isn't wired up here."); });
+document.getElementById("logoutBtnStudent").addEventListener("click", ()=>{
+  document.getElementById("studentLoginForm").reset();
+  goToPage("page-home");
+  showToast("You have been logged out.");
+});
+
+/* ============================================================
+   PARENT LOGIN / LOGOUT
+   ============================================================ */
+function randCaptcha(){
+  const a = rnd(1,9), b = rnd(1,9);
+  document.getElementById("parentCaptchaText").textContent = a + " + " + b;
+  document.getElementById("parentCaptchaText").dataset.answer = (a+b);
+}
+randCaptcha();
+document.getElementById("parentCaptchaReload").addEventListener("click", randCaptcha);
+
+document.getElementById("parentLoginForm").addEventListener("submit", function(e){
+  e.preventDefault();
+  const roll = document.getElementById("pRollNo").value.trim();
+  const dob = document.getElementById("pDob").value;
+  const ans = document.getElementById("parentCaptchaInput").value.trim();
+  const errBox = document.getElementById("parentLoginError");
+  const correct = document.getElementById("parentCaptchaText").dataset.answer;
+  if(!roll || !dob){ errBox.textContent = "Please enter the register number and date of birth."; errBox.classList.remove("hidden"); return; }
+  if(ans !== correct){ errBox.textContent = "Captcha answer is incorrect."; errBox.classList.remove("hidden"); randCaptcha(); document.getElementById("parentCaptchaInput").value=""; return; }
+  errBox.classList.add("hidden");
+  generateAll(roll);
+  goToPage("page-parent-app", { after: ()=>{
+    document.getElementById("topParentName").textContent = "Parent of " + student.name;
+    setActiveParentView("profile");
+  }});
+});
+document.getElementById("logoutBtnParent").addEventListener("click", ()=>{
+  document.getElementById("parentLoginForm").reset();
+  randCaptcha();
+  goToPage("page-home");
+  showToast("You have been logged out.");
+});
+
+/* ============================================================
+   STAFF LOGIN (Faculty ID + password -> OTP -> sign in) / LOGOUT
+   ============================================================ */
+let currentOtp = null;
+let staffName = "";
+const FACULTY_LAST = ["Radha","Jawahar","Prakash","Raghuraman","Meenakshi","Bhaskaran","Anitha","Selvam"];
+
+document.getElementById("staffCredsForm").addEventListener("submit", function(e){
+  e.preventDefault();
+  const facId = document.getElementById("facId").value.trim();
+  const facPwd = document.getElementById("facPwd").value.trim();
+  const errBox = document.getElementById("staffLoginError");
+  if(!facId || !facPwd){ errBox.textContent = "Please enter both Faculty ID and password."; errBox.classList.remove("hidden"); return; }
+  errBox.classList.add("hidden");
+  currentOtp = String(rnd(100000,999999));
+  staffName = "Dr. " + pick(FACULTY_LAST);
+  document.getElementById("staffStepCreds").classList.add("hidden");
+  document.getElementById("staffStepOtp").classList.remove("hidden");
+  document.getElementById("otpNotice").textContent = "An OTP has been sent to the registered mobile number for " + facId + ". (Demo OTP: " + currentOtp + ")";
+  showToast("OTP sent.");
+});
+document.getElementById("resendOtpLink").addEventListener("click", function(e){
+  e.preventDefault();
+  currentOtp = String(rnd(100000,999999));
+  document.getElementById("otpNotice").textContent = "A new OTP has been sent. (Demo OTP: " + currentOtp + ")";
+  showToast("OTP resent.");
+});
+document.getElementById("staffSignInBtn").addEventListener("click", function(){
+  const entered = document.getElementById("facOtp").value.trim();
+  const errBox = document.getElementById("staffLoginError");
+  if(entered !== currentOtp){ errBox.textContent = "Incorrect OTP. Please try again."; errBox.classList.remove("hidden"); return; }
+  errBox.classList.add("hidden");
+  goToPage("page-staff-app", { after: ()=>{
+    document.getElementById("topStaffName").textContent = staffName;
+    renderStaffHome();
+  }});
+});
+document.getElementById("forgotLinkStaff").addEventListener("click", e=>{ e.preventDefault(); showToast("Demo only \u2014 password reset isn't wired up here."); });
+document.getElementById("logoutBtnStaff").addEventListener("click", ()=>{
+  document.getElementById("staffCredsForm").reset();
+  document.getElementById("staffStepOtp").classList.add("hidden");
+  document.getElementById("staffStepCreds").classList.remove("hidden");
+  document.getElementById("facOtp").value = "";
+  goToPage("page-home");
+  showToast("You have been logged out.");
+});
+
+/* ============================================================
+   PEOPLE PAGE (real public directory data)
+   ============================================================ */
+const PEOPLE = [
+  {name:"Dr. S. Radha", role:"Principal &amp; Chief Controller of Examinations", img:"https://coe.ssn.edu.in/assets/photos/staff/20200089.jpg"},
+  {name:"Dr. A. Jawahar", role:"Controller of Examinations", img:"https://coe.ssn.edu.in/assets/photos/staff/20200004.jpg"},
+  {name:"Dr. R. Prakash", role:"Deputy Controller of Examinations", img:"https://coe.ssn.edu.in/assets/photos/staff/20200188.jpg"},
+  {name:"Dr. G. Raghuraman", role:"Deputy Controller of Examinations", img:"https://coe.ssn.edu.in/assets/photos/staff/20200098.webp"},
+  {name:"Mr. N. Sakthi Ganesh", role:"Assistant Executive", img:"https://coe.ssn.edu.in/assets/photos/staff/20200109.jpg"},
+  {name:"Mr. S. Saravanan", role:"Junior Executive", img:"https://coe.ssn.edu.in/assets/photos/staff/20200422.jpg"},
+  {name:"Mr. S. Satish Kumar", role:"Assistant Executive", img:"https://coe.ssn.edu.in/assets/photos/staff/20200423.jpg"},
+  {name:"Mr. L. Ruban", role:"Junior Executive", img:"https://coe.ssn.edu.in/assets/photos/staff/20200517.jpeg"},
+  {name:"Ms. M. Hemapriya", role:"Junior Application Developer", img:"https://coe.ssn.edu.in/assets/photos/staff/20200664.jpg"},
+  {name:"Mr. V. Padmanaban", role:"Lab Attender", img:"https://coe.ssn.edu.in/assets/photos/staff/pad.jpeg"}
+];
+document.getElementById("peopleGrid").innerHTML = PEOPLE.map(p=>`
+  <div class="people-card">
+    <img class="photo" src="${p.img}" alt="${p.name}" onerror="this.outerHTML='<div class=&quot;photo&quot;>${initials(p.name)}</div>'">
+    <h4>${p.name}</h4>
+    <p>${p.role}</p>
+  </div>
+`).join("");
+
+/* ============================================================
+   STUDENT DASHBOARD VIEWS
+   ============================================================ */
+const STUDENT_VIEWS = {
+  profile: renderProfile, uploadPhoto: renderUploadPhoto, verifyGradesheet: renderVerifyGradesheet,
+  registeredSubjects: renderRegisteredSubjects, catMarks: renderCatMarks, finalInternal: renderFinalInternal,
+  examSeatings: renderExamSeatings, endsemResults: renderEndsemResults, academicReport: renderAcademicReport,
+  photocopy: renderPhotocopy, changePassword: renderChangePassword
+};
+document.querySelectorAll('#page-student-app .navitem[data-view]').forEach(btn=>{
+  btn.addEventListener("click", ()=> setActiveStudentView(btn.dataset.view));
+});
+function setActiveStudentView(view){
+  document.querySelectorAll('#page-student-app .navitem[data-view]').forEach(b=> b.classList.toggle("active", b.dataset.view===view));
+  STUDENT_VIEWS[view]();
+  window.scrollTo(0,0);
+}
+
+function renderProfile(){
+  const photoHtml = photoDataUrl ? `<img src="${photoDataUrl}" class="profile-photo" alt="Student photo">` : `<div class="profile-photo">${initials(student.name)}</div>`;
+  document.getElementById("studentContent").innerHTML = `
+    <div class="panel"><h2>Student Profile</h2><p class="desc">Register number ${student.rollNo}</p>
+      <div class="profile-grid">${photoHtml}
+        <div class="info-grid">
+          <div class="info-item"><span class="lbl">Name</span>${student.name}</div>
+          <div class="info-item"><span class="lbl">Register Number</span>${student.rollNo}</div>
+          <div class="info-item"><span class="lbl">Department</span>${student.department} (${student.deptCode})</div>
+          <div class="info-item"><span class="lbl">Batch</span>${student.batch}</div>
+          <div class="info-item"><span class="lbl">Current Semester</span>${student.currentSemester}</div>
+          <div class="info-item"><span class="lbl">Date of Birth</span>${student.dob}</div>
+          <div class="info-item"><span class="lbl">Blood Group</span>${student.bloodGroup}</div>
+          <div class="info-item"><span class="lbl">Quota</span>${student.quota}</div>
+          <div class="info-item"><span class="lbl">Email</span>${student.email}</div>
+          <div class="info-item"><span class="lbl">Phone</span>${student.phone}</div>
+          <div class="info-item"><span class="lbl">Father's Name</span>${student.fatherName}</div>
+          <div class="info-item"><span class="lbl">Mother's Name</span>${student.motherName}</div>
+          <div class="info-item" style="grid-column:1/-1;"><span class="lbl">Address</span>${student.address}</div>
+        </div>
+      </div>
+    </div>`;
+}
+function renderUploadPhoto(){
+  document.getElementById("studentContent").innerHTML = `
+    <div class="panel"><h2>Upload Photo</h2><p class="desc">Upload a passport-size photograph for your student record. (Demo: image stays in this browser tab only.)</p>
+      <div class="upload-box">
+        <div id="previewWrap" style="margin-bottom:14px;">
+          ${photoDataUrl ? `<img src="${photoDataUrl}" style="width:120px;height:140px;object-fit:cover;border:1px solid var(--line);border-radius:4px;">` : `<div class="profile-photo" style="margin:0 auto;">${initials(student.name)}</div>`}
+        </div>
+        <input type="file" id="photoInput" accept="image/*" style="margin-bottom:10px;">
+        <div><button class="btn gold" id="savePhotoBtn">Save Photo</button></div>
+        <p class="note">Accepted formats: JPG, PNG. Max size 200 KB (not enforced in this demo).</p>
+      </div>
+    </div>`;
+  const input = document.getElementById("photoInput");
+  let pendingDataUrl = null;
+  input.addEventListener("change", ()=>{
+    const file = input.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = e=>{ pendingDataUrl = e.target.result;
+      document.getElementById("previewWrap").innerHTML = `<img src="${pendingDataUrl}" style="width:120px;height:140px;object-fit:cover;border:1px solid var(--line);border-radius:4px;">`; };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById("savePhotoBtn").addEventListener("click", ()=>{
+    if(!pendingDataUrl){ showToast("Choose an image file first."); return; }
+    photoDataUrl = pendingDataUrl;
+    document.getElementById("topAvatar").outerHTML = `<img src="${photoDataUrl}" id="topAvatar">`;
+    showToast("Photo updated.");
+  });
+}
+function renderVerifyGradesheet(){
+  const rows = gradesheetRows.map(r=>`
+    <tr><td>Semester ${r.sem}</td><td>${r.verified?'<span class="pill green">Verified</span>':'<span class="pill amber">Pending</span>'}</td>
+    <td><button class="btn small ${r.verified?'outline':''}" data-sem="${r.sem}" ${r.verified?'disabled':''}>${r.verified?'Verified':'Verify Now'}</button></td></tr>`).join("");
+  document.getElementById("studentContent").innerHTML = `
+    <div class="panel"><h2>Verify Gradesheet</h2><p class="desc">Confirm that the grades on record for each semester are correct.</p>
+      <table><thead><tr><th>Semester</th><th>Status</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table>
+    </div>`;
+  document.querySelectorAll("#studentContent button[data-sem]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const sem = parseInt(btn.dataset.sem,10);
+      gradesheetRows.find(r=>r.sem===sem).verified = true;
+      renderVerifyGradesheet();
+      showToast("Semester " + sem + " gradesheet marked as verified.");
+    });
+  });
+}
+function renderRegisteredSubjects(){
+  const rows = subjects.map(s=>`<tr><td>${s.code}</td><td>${s.name}</td><td>${s.credits}</td><td><span class="pill green">${s.status}</span></td></tr>`).join("");
+  const totalCredits = subjects.reduce((a,s)=>a+s.credits,0);
+  document.getElementById("studentContent").innerHTML = `
+    <div class="panel"><h2>Registered Subjects</h2><p class="desc">Semester ${student.currentSemester} &mdash; ${student.department}</p>
+      <table><thead><tr><th>Course Code</th><th>Course Title</th><th>Credits</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
+      <p class="note">Total registered credits: <span class="credit-line">${totalCredits}</span></p>
+    </div>`;
+}
+function renderCatMarks(selectedSem){
+  const sem = selectedSem || student.currentSemester;
+  const rec = semesterRecords[sem];
+  const options = Object.keys(semesterRecords).sort((a,b)=>b-a).map(s=>`<option value="${s}" ${parseInt(s,10)===sem?'selected':''}>Semester ${s} &mdash; ${semesterRecords[s].examLabel}</option>`).join("");
+  const rows = rec.catMarks.map(c=>`<tr><td>${c.code}</td><td>${c.name}</td><td>${c.cat1} / 50</td><td>${c.cat2} / 50</td><td>${c.cat3} / 50</td></tr>`).join("");
+  document.getElementById("studentContent").innerHTML = `
+    <div class="panel"><h2>CAT Marks</h2>
+      <p class="desc">Continuous Assessment Test scores</p>
+      <div class="field" style="max-width:320px;"><label>Exam Session</label>
+        <select id="catSemSelect">${options}</select>
+      </div>
+      <table><thead><tr><th>Course Code</th><th>Course Title</th><th>CAT 1</th><th>CAT 2</th><th>CAT 3</th></tr></thead><tbody>${rows}</tbody></table>
+    </div>`;
+  document.getElementById("catSemSelect").addEventListener("change", function(){
+    renderCatMarks(parseInt(this.value,10));
+  });
+}
+function renderFinalInternal(){
+  const rows = finalMarks.map(f=>`<tr><td>${f.code}</td><td>${f.name}</td><td>${f.catComponent} / 20</td><td>${f.assignment} / 5</td><td>${f.attendance} / 5</td><td><strong>${f.total} / 30</strong></td></tr>`).join("");
+  document.getElementById("studentContent").innerHTML = `
+    <div class="panel"><h2>Final Internal Marks</h2><p class="desc">Consolidated internal assessment for Semester ${student.currentSemester}</p>
+      <table><thead><tr><th>Course Code</th><th>Course Title</th><th>CAT Avg (20)</th><th>Assignment (5)</th><th>Attendance (5)</th><th>Total (30)</th></tr></thead><tbody>${rows}</tbody></table>
+    </div>`;
+}
+function renderExamSeatings(){
+  const rows = seatings.map(s=>`<tr><td>${s.date}</td><td>${s.session}</td><td>${s.code}</td><td>${s.name}</td><td>${s.hall}</td><td>${s.seatNo}</td></tr>`).join("");
+  document.getElementById("studentContent").innerHTML = `
+    <div class="panel"><h2>Exam Timetable &amp; Seating</h2><p class="desc">End Semester Examination schedule &mdash; Semester ${student.currentSemester}</p>
+      <table><thead><tr><th>Date</th><th>Session</th><th>Code</th><th>Course Title</th><th>Hall</th><th>Seat No.</th></tr></thead><tbody>${rows}</tbody></table>
+    </div>`;
+}
+function renderEndsemResults(selectedSem){
+  const sem = selectedSem || student.currentSemester;
+  const rec = semesterRecords[sem];
+  const options = Object.keys(semesterRecords).sort((a,b)=>b-a).map(s=>`<option value="${s}" ${parseInt(s,10)===sem?'selected':''}>Semester ${s} &mdash; ${semesterRecords[s].examLabel}</option>`).join("");
+  const rows = rec.results.map(r=>`<tr><td>${r.code}</td><td>${r.name}</td><td>${r.credits}</td><td><span class="pill ${r.grade==='U'?'red':'green'}">${r.grade}</span></td><td>${r.result==='PASS'?'<span class="pill green">PASS</span>':'<span class="pill red">RA</span>'}</td></tr>`).join("");
+  document.getElementById("studentContent").innerHTML = `
+    <div class="panel"><h2>End Semester Results</h2>
+      <p class="desc">${rec.examLabel} &mdash; Semester ${sem}</p>
+      <div class="field" style="max-width:320px;"><label>Exam Session</label>
+        <select id="resultSemSelect">${options}</select>
+      </div>
+      <div class="stat-row">
+        <div class="stat-box"><div class="num">${rec.sgpa}</div><div class="lbl">SGPA</div></div>
+        <div class="stat-box"><div class="num">${rec.totalCredits}</div><div class="lbl">Credits Earned</div></div>
+        <div class="stat-box"><div class="num">${rec.results.filter(r=>r.result==='PASS').length}/${rec.results.length}</div><div class="lbl">Subjects Passed</div></div>
+      </div>
+      <table><thead><tr><th>Code</th><th>Course Title</th><th>Credits</th><th>Grade</th><th>Result</th></tr></thead><tbody>${rows}</tbody></table>
+    </div>`;
+  document.getElementById("resultSemSelect").addEventListener("change", function(){
+    renderEndsemResults(parseInt(this.value,10));
+  });
+}
+function renderAcademicReport(){
+  const rows = semesterHistory.map(h=>`<tr><td>Semester ${h.sem}</td><td>${h.credits}</td><td>${h.sgpa}</td><td>${h.cgpa}</td></tr>`).join("");
+  const latest = semesterHistory[semesterHistory.length-1];
+  const totalCredits = semesterHistory.reduce((a,h)=>a+h.credits,0);
+  document.getElementById("studentContent").innerHTML = `
+    <div class="panel"><h2>Academic Report</h2><p class="desc">Cumulative academic performance up to Semester ${student.currentSemester}</p>
+      <div class="stat-row">
+        <div class="stat-box"><div class="num">${latest.cgpa}</div><div class="lbl">CGPA</div></div>
+        <div class="stat-box"><div class="num">${totalCredits}</div><div class="lbl">Total Credits</div></div>
+        <div class="stat-box"><div class="num">${student.currentSemester}</div><div class="lbl">Semesters Completed</div></div>
+      </div>
+      <table><thead><tr><th>Semester</th><th>Credits</th><th>SGPA</th><th>CGPA</th></tr></thead><tbody>${rows}</tbody></table>
+    </div>`;
+}
+function renderPhotocopy(){
+  document.getElementById("studentContent").innerHTML = `
+    <div class="panel">
+      <h2>Photocopy &amp; Revaluation</h2>
+      <p class="desc">Choose what you'd like to do for Semester ${student.currentSemester} subjects</p>
+      <div class="quick-grid">
+        <button class="quick-card" style="text-align:left;cursor:pointer;border:1px solid var(--line);border-left:4px solid var(--gold);width:100%;" id="choosePhotocopy">
+          <b>&#128203; Photocopy of Answer Scripts</b>
+          Apply for a copy of your answer script, or download it once it's ready.
+        </button>
+        <button class="quick-card" style="text-align:left;cursor:pointer;border:1px solid var(--line);border-left:4px solid var(--gold);width:100%;" id="chooseReval">
+          <b>&#9999;&#65039; Revaluation</b>
+          Apply to have a subject's answer script revalued.
+        </button>
+      </div>
+    </div>`;
+  document.getElementById("choosePhotocopy").addEventListener("click", ()=> renderPhotocopyAction("photocopy"));
+  document.getElementById("chooseReval").addEventListener("click", ()=> renderPhotocopyAction("reval"));
+}
+
+function renderPhotocopyAction(type){
+  const isPhotocopy = type === "photocopy";
+  const title = isPhotocopy ? "Photocopy of Answer Scripts" : "Revaluation";
+  function statusPill(s){
+    if(s==="Completed"||s==="Available for Download") return `<span class="pill green">${s}</span>`;
+    if(s==="Applied"||s==="Under Review") return `<span class="pill amber">${s}</span>`;
+    return `<span class="pill gray">${s}</span>`;
+  }
+  function actionCell(p, idx){
+    const status = isPhotocopy ? p.photocopyStatus : p.revalStatus;
+    if(status === "Not Applied"){
+      return `<button class="btn small outline" data-idx="${idx}" data-do="apply">Apply</button>`;
+    }
+    if(status === "Available for Download"){
+      return `<button class="btn small gold" data-idx="${idx}" data-do="download">Download</button>`;
+    }
+    return `<span class="note" style="margin:0;">&mdash;</span>`;
+  }
+  const rows = photocopyRows.map((p,idx)=>`
+    <tr><td>${p.code}</td><td>${p.name}</td>
+      <td>${statusPill(isPhotocopy ? p.photocopyStatus : p.revalStatus)}</td>
+      <td>&#8377;${p.fee}</td>
+      <td>${actionCell(p, idx)}</td>
+    </tr>`).join("");
+  document.getElementById("studentContent").innerHTML = `
+    <div class="panel">
+      <button class="btn small outline" id="backToChoice" style="margin-bottom:14px;">&larr; Back</button>
+      <h2>${title}</h2>
+      <p class="desc">Semester ${student.currentSemester} subjects</p>
+      <table><thead><tr><th>Code</th><th>Course Title</th><th>Status</th><th>Fee</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table>
+    </div>`;
+  document.getElementById("backToChoice").addEventListener("click", renderPhotocopy);
+  document.querySelectorAll("#studentContent button[data-do]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const idx = parseInt(btn.dataset.idx,10);
+      const row = photocopyRows[idx];
+      if(btn.dataset.do === "apply"){
+        if(isPhotocopy){ row.photocopyStatus = "Applied"; } else { row.revalStatus = "Applied"; }
+        showToast((isPhotocopy?"Photocopy":"Revaluation") + " request submitted for " + row.code + ".");
+      } else if(btn.dataset.do === "download"){
+        const blob = new Blob(
+          ["SSN College of Engineering - Office of the COE\nPhotocopy of Answer Script (Demo)\n\nRegister Number: " + student.rollNo +
+           "\nSubject: " + row.code + " - " + row.name + "\nSemester: " + student.currentSemester +
+           "\n\nThis is a placeholder file generated for demo purposes only."],
+          {type:"text/plain"}
+        );
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = row.code + "_photocopy_demo.txt";
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast("Downloaded demo photocopy for " + row.code + ".");
+      }
+      renderPhotocopyAction(type);
+    });
+  });
+}
+function renderChangePassword(){
+  document.getElementById("studentContent").innerHTML = `
+    <div class="panel"><h2>Change Password</h2><p class="desc">Update the password used to sign in to this portal.</p>
+      <div id="cpMsg"></div>
+      <form id="cpForm" style="max-width:360px;">
+        <div class="field"><label>Current Password</label><input type="password" id="cpCurrent" required></div>
+        <div class="field"><label>New Password</label><input type="password" id="cpNew" required></div>
+        <div class="field"><label>Confirm New Password</label><input type="password" id="cpConfirm" required></div>
+        <button type="submit" class="btn gold">Update Password</button>
+      </form>
+    </div>`;
+  document.getElementById("cpForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    const nw = document.getElementById("cpNew").value, cf = document.getElementById("cpConfirm").value;
+    const msgBox = document.getElementById("cpMsg");
+    if(nw.length < 6){ msgBox.innerHTML = `<div class="login-error">New password must be at least 6 characters.</div>`; return; }
+    if(nw !== cf){ msgBox.innerHTML = `<div class="login-error">New password and confirmation do not match.</div>`; return; }
+    msgBox.innerHTML = `<div class="login-ok">Password updated successfully (demo only &mdash; nothing is actually stored).</div>`;
+    document.getElementById("cpForm").reset();
+    showToast("Password changed.");
+  });
+}
+
+/* ============================================================
+   PARENT DASHBOARD VIEWS (read-only subset)
+   ============================================================ */
+const PARENT_VIEWS = {
+  profile: ()=>renderParentPanel("Ward's Profile", ()=>{
+    return `<div class="profile-grid"><div class="profile-photo">${initials(student.name)}</div>
+      <div class="info-grid">
+        <div class="info-item"><span class="lbl">Name</span>${student.name}</div>
+        <div class="info-item"><span class="lbl">Register Number</span>${student.rollNo}</div>
+        <div class="info-item"><span class="lbl">Department</span>${student.department} (${student.deptCode})</div>
+        <div class="info-item"><span class="lbl">Batch</span>${student.batch}</div>
+        <div class="info-item"><span class="lbl">Current Semester</span>${student.currentSemester}</div>
+        <div class="info-item"><span class="lbl">Date of Birth</span>${student.dob}</div>
+      </div></div>`;
+  }),
+  registeredSubjects: ()=>renderParentPanel("Registered Subjects", ()=>{
+    const rows = subjects.map(s=>`<tr><td>${s.code}</td><td>${s.name}</td><td>${s.credits}</td></tr>`).join("");
+    return `<table><thead><tr><th>Code</th><th>Course Title</th><th>Credits</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }),
+  catMarks: ()=>renderParentPanel("CAT Marks", ()=>{
+    const rows = catMarks.map(c=>`<tr><td>${c.code}</td><td>${c.name}</td><td>${c.cat1}/50</td><td>${c.cat2}/50</td><td>${c.cat3}/50</td></tr>`).join("");
+    return `<table><thead><tr><th>Code</th><th>Title</th><th>CAT1</th><th>CAT2</th><th>CAT3</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }),
+  finalInternal: ()=>renderParentPanel("Final Internal Marks", ()=>{
+    const rows = finalMarks.map(f=>`<tr><td>${f.code}</td><td>${f.name}</td><td>${f.total}/30</td></tr>`).join("");
+    return `<table><thead><tr><th>Code</th><th>Title</th><th>Total</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }),
+  endsemResults: ()=>renderParentPanel("Exam Results", ()=>{
+    const rows = results.map(r=>`<tr><td>${r.code}</td><td>${r.name}</td><td><span class="pill ${r.grade==='U'?'red':'green'}">${r.grade}</span></td><td>${r.result}</td></tr>`).join("");
+    return `<table><thead><tr><th>Code</th><th>Title</th><th>Grade</th><th>Result</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }),
+  academicReport: ()=>renderParentPanel("Academic Report", ()=>{
+    const rows = semesterHistory.map(h=>`<tr><td>Semester ${h.sem}</td><td>${h.credits}</td><td>${h.sgpa}</td><td>${h.cgpa}</td></tr>`).join("");
+    const latest = semesterHistory[semesterHistory.length-1];
+    return `<div class="stat-row"><div class="stat-box"><div class="num">${latest.cgpa}</div><div class="lbl">CGPA</div></div></div>
+      <table><thead><tr><th>Semester</th><th>Credits</th><th>SGPA</th><th>CGPA</th></tr></thead><tbody>${rows}</tbody></table>`;
+  })
+};
+document.querySelectorAll('#page-parent-app .navitem[data-pview]').forEach(btn=>{
+  btn.addEventListener("click", ()=> setActiveParentView(btn.dataset.pview));
+});
+function setActiveParentView(view){
+  document.querySelectorAll('#page-parent-app .navitem[data-pview]').forEach(b=> b.classList.toggle("active", b.dataset.pview===view));
+  PARENT_VIEWS[view]();
+  window.scrollTo(0,0);
+}
+function renderParentPanel(title, bodyFn){
+  document.getElementById("parentContent").innerHTML = `<div class="panel"><h2>${title}</h2><p class="desc">${student.name} &mdash; ${student.rollNo}</p>${bodyFn()}</div>`;
+}
+
+/* ============================================================
+   STAFF DASHBOARD (simple placeholder)
+   ============================================================ */
+function renderStaffHome(){
+  document.getElementById("staffContent").innerHTML = `
+    <div class="panel">
+      <h2>Welcome, ${staffName}</h2>
+      <p class="desc">Students Marks Entry Portal</p>
+      <div class="quick-grid">
+        <div class="quick-card"><b>Enter CAT Marks</b>Upload or edit CAT 1 / 2 / 3 marks for your assigned courses.</div>
+        <div class="quick-card"><b>Enter Final Internal Marks</b>Consolidate internal assessment marks before submission.</div>
+        <div class="quick-card"><b>View Registered Students</b>See the list of students registered for your courses this semester.</div>
+        <div class="quick-card"><b>Exam Duty Roster</b>Check your invigilation schedule for the upcoming exams.</div>
+      </div>
+      <p class="note">This is a placeholder staff dashboard for the demo &mdash; the real marks-entry workflows aren't implemented here.</p>
+    </div>`;
+}
+</script>
+</body>
+</html>
