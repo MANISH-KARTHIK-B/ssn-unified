@@ -13,7 +13,7 @@ import ExamTimetable from "./pages/ExamTimetable";
 import ExamResults from "./pages/ExamResults";
 import UploadPhoto from "./pages/UploadPhoto";
 import ChangePassword from "./pages/ChangePassword";
-import PhotocopyRevaluation from "./pages/PhotocopyRevaluation";
+import PhotocopyRevaluation from "./pages/PhotocopyRevaluation"; 
 
 function Shell() {
   const { user, loading } = useAuth();
