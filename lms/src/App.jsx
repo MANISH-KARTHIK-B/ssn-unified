@@ -5,17 +5,19 @@ import LocalLogin from "./components/LocalLogin";
 import Nav from "./components/Nav";
 import MyCourses from "./pages/MyCourses";
 import CourseContent from "./pages/CourseContent";
+import FacultyDashboard from "./pages/FacultyDashboard";
 
 function Shell() {
   const { user, loading } = useAuth();
   if (loading) return <div className="grid min-h-screen place-items-center text-graphite-500">Loading…</div>;
   if (!user) return <LocalLogin />;
+  const isFaculty = user.role === "faculty";
   return (
     <div className="min-h-screen">
       <Nav />
       <Routes>
-        <Route path="/" element={<MyCourses />} />
-        <Route path="/course/:id" element={<CourseContent />} />
+        <Route path="/" element={isFaculty ? <FacultyDashboard /> : <MyCourses />} />
+        {!isFaculty && <Route path="/course/:id" element={<CourseContent />} />}
       </Routes>
       <footer className="border-t border-gray-200 py-6 text-center text-xs text-graphite-500">Part of SSN Unified</footer>
     </div>
