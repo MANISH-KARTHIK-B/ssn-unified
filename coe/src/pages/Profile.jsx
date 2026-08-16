@@ -3,7 +3,7 @@ import { UserCircle2 } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { useFaculty } from "../lib/facultyContext";
 import { api } from "../lib/api";
-import FacultyBar from "../components/FacultyBar";
+import FacultyBar from "../components/FacultyBar"; 
  
 function ProfileCard({ person }) {
   const rows = [
