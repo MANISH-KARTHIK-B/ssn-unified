@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ArrowLeft, BookMarked } from "lucide-react";
+import { ArrowLeft, BookMarked, RefreshCw, Check } from "lucide-react";
 import { api, HUB_URL } from "../lib/api";
 import { useAuth } from "../lib/auth";
 
@@ -15,12 +15,25 @@ function daysOverdue(dueOn) {
 export default function MyAccount({ onBack }) {
   const { user } = useAuth();
   const [issued, setIssued] = useState([]);
+  const [renewing, setRenewing] = useState(null);
 
   useEffect(() => {
     api.get("/api/library/issued").then((res) => setIssued(res.data));
   }, []);
 
   const totalFine = issued.reduce((sum, b) => sum + daysOverdue(b.dueOn) * FINE_PER_DAY, 0);
+
+  async function renew(id) {
+    setRenewing(id);
+    try {
+      const res = await api.post(`/api/library/issued/${id}/renew`);
+      setIssued((prev) => prev.map((b) => (b.id === id ? res.data : b)));
+    } catch {
+      // already renewed or not found - ignore for this demo
+    } finally {
+      setRenewing(null);
+    }
+  }
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-8">
@@ -50,6 +63,7 @@ export default function MyAccount({ onBack }) {
               <th className="px-5 py-3">Due on</th>
               <th className="px-5 py-3">Overdue</th>
               <th className="px-5 py-3">Fine</th>
+              <th className="px-5 py-3"></th>
             </tr>
           </thead>
           <tbody>
@@ -68,11 +82,26 @@ export default function MyAccount({ onBack }) {
                     )}
                   </td>
                   <td className="px-5 py-3.5 font-medium text-ocean-900">₹{overdue * FINE_PER_DAY}</td>
+                  <td className="px-5 py-3.5">
+                    {b.renewed ? (
+                      <span className="flex items-center gap-1 text-xs font-semibold text-ocean-500">
+                        <Check className="h-3.5 w-3.5" /> Renewed
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => renew(b.id)}
+                        disabled={renewing === b.id}
+                        className="flex items-center gap-1 rounded-md border border-ocean-200 px-2.5 py-1.5 text-xs font-medium text-ocean-700 hover:border-ocean-500 disabled:opacity-50"
+                      >
+                        <RefreshCw className="h-3.5 w-3.5" /> {renewing === b.id ? "Renewing…" : "Renew"}
+                      </button>
+                    )}
+                  </td>
                 </tr>
               );
             })}
             {issued.length === 0 && (
-              <tr><td colSpan={5} className="px-5 py-8 text-center text-ocean-500">No books currently issued.</td></tr>
+              <tr><td colSpan={6} className="px-5 py-8 text-center text-ocean-500">No books currently issued.</td></tr>
             )}
           </tbody>
         </table>
