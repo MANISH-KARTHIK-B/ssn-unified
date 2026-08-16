@@ -7,7 +7,7 @@ import FacultyBar from "../components/FacultyBar";
 
 export default function CatMarks() {
   const { user } = useAuth();
-  const isFaculty = user?.role === "faculty";
+  const isFaculty = user?.role === "faculty"; 
   const { selectedStudentId } = useFaculty();
   const [data, setData] = useState(null);
   const [savingSubject, setSavingSubject] = useState(null);
