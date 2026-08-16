@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ChevronDown, FileText, File, List, ArrowLeft, Check } from "lucide-react";
+import { ChevronDown, FileText, File, List, ArrowLeft, Check, ClipboardList, Upload } from "lucide-react";
 import { api } from "../lib/api";
 
 function LessonIcon({ type }) {
@@ -42,6 +42,75 @@ function Unit({ unit, onToggle }) {
   );
 }
 
+function Assignments({ courseId, assignments }) {
+  const [submissions, setSubmissions] = useState([]);
+  const [drafts, setDrafts] = useState({});
+  const [busyId, setBusyId] = useState(null);
+
+  useEffect(() => {
+    api.get(`/api/lms/courses/${courseId}/my-submissions`).then((res) => setSubmissions(res.data));
+  }, [courseId]);
+
+  async function submit(assignmentId) {
+    setBusyId(assignmentId);
+    try {
+      const res = await api.post(`/api/lms/courses/${courseId}/assignments/${assignmentId}/submit`, {
+        note: drafts[assignmentId] || "",
+        fileName: `${assignmentId}-submission.txt`
+      });
+      setSubmissions((prev) => [...prev.filter((s) => s.assignmentId !== assignmentId), res.data]);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  if (!assignments || assignments.length === 0) return null;
+
+  return (
+    <div className="mb-6 overflow-hidden rounded-2xl border border-gray-200 bg-white">
+      <div className="flex items-center gap-2 border-b border-gray-100 px-5 py-4">
+        <ClipboardList className="h-4 w-4 text-violet-600" />
+        <span className="font-display text-sm font-bold uppercase tracking-wide text-graphite-900">Assignments</span>
+      </div>
+      <div className="space-y-3 px-5 py-4">
+        {assignments.map((a) => {
+          const submission = submissions.find((s) => s.assignmentId === a.id);
+          return (
+            <div key={a.id} className="rounded-xl border border-gray-100 p-4">
+              <div className="mb-1 flex items-center justify-between">
+                <p className="text-sm font-semibold text-graphite-900">{a.title}</p>
+                <span className="text-xs text-graphite-500">Due {a.dueDate}</span>
+              </div>
+              <p className="mb-3 text-xs text-graphite-500">{a.description}</p>
+              {submission ? (
+                <div className="flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2 text-xs text-green-700">
+                  <Check className="h-3.5 w-3.5" /> Submitted on {new Date(submission.submittedAt).toLocaleDateString()} — "{submission.note}"
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    value={drafts[a.id] || ""}
+                    onChange={(e) => setDrafts((prev) => ({ ...prev, [a.id]: e.target.value }))}
+                    placeholder="Add a note (mock file upload for this prototype)"
+                    className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-xs"
+                  />
+                  <button
+                    onClick={() => submit(a.id)}
+                    disabled={busyId === a.id}
+                    className="flex items-center gap-1.5 rounded-lg bg-violet-500 px-3 py-2 text-xs font-semibold text-white hover:bg-violet-600 disabled:opacity-60"
+                  >
+                    <Upload className="h-3.5 w-3.5" /> {busyId === a.id ? "Submitting…" : "Submit"}
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function CourseContent() {
   const { id } = useParams();
   const [course, setCourse] = useState(null);
@@ -67,6 +136,7 @@ export default function CourseContent() {
           <ArrowLeft className="h-3.5 w-3.5" /> Back to My courses
         </Link>
         <h1 className="mb-6 font-display text-xl font-bold text-graphite-900">{course.code} — {course.title}</h1>
+        <Assignments courseId={id} assignments={course.assignments} />
         {course.units.map((u) => <Unit key={u.id} unit={u} onToggle={toggleLesson} />)}
       </main>
     </div>
