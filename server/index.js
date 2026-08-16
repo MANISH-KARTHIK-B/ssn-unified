@@ -13,7 +13,7 @@ const db = await initDb();
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(morgan("dev"));
+app.use(morgan("dev")); 
 app.use(attachUser);
 
 const server = http.createServer(app);
