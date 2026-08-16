@@ -3,6 +3,8 @@ import { AuthProvider, useAuth } from "./lib/auth";
 import LocalLogin from "./components/LocalLogin";
 import Sidebar from "./components/Sidebar";
 import PassRequests from "./pages/PassRequests";
+import WardenDashboard from "./pages/WardenDashboard";
+import MentorApprovals from "./pages/MentorApprovals";
 
 function Shell() {
   const { user, loading } = useAuth();
@@ -11,7 +13,13 @@ function Shell() {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <PassRequests />
+      {user.role === "warden" ? (
+        <WardenDashboard />
+      ) : user.role === "faculty" ? (
+        <MentorApprovals />
+      ) : (
+        <PassRequests />
+      )}
     </div>
   );
 }
