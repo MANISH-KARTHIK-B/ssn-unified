@@ -8,7 +8,7 @@ import FacultyBar from "../components/FacultyBar";
 function ProfileCard({ person }) {
   const rows = [
     ["Full Name", person.name],
-    ["Digital ID", person.digitalId],
+    ["Digital ID", person.digitalId], 
     ["DOB", person.dob],
     ["Gender", person.gender],
     ["Email", person.email],
