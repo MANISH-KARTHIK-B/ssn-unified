@@ -98,4 +98,9 @@ export default function MentorApprovals() {
               </span>
             </div>
           ))}
-          {decided.length === 0 &&
+          {decided.length === 0 && <p className="p-6 text-sm text-ink-500">Nothing decided yet.</p>}
+        </div>
+      </div>
+    </div>
+  );
+}
