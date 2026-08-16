@@ -16,7 +16,7 @@ function ProfileCard({ person }) {
     ["Department", person.department],
     ["Batch", person.batch],
     ["Section", person.section],
-    ["Regulation", person.regulation]
+    ["Regulation", person.regulation] 
   ];
 
   return (
